@@ -278,6 +278,14 @@ body {
   }
 }
 
+/* Center the products grid content on small screens */
+@media (max-width: 480px) {
+  .products-grid { display: flex; justify-content: center; }
+  .products-grid .row { max-width: 360px; width: 100%; margin: 0; }
+  .products-grid .col { flex: 0 0 100%; max-width: 100%; }
+  .products-grid .product-card { width: 100% !important; max-width: 100% !important; }
+}
+
 /* Remove any remaining container/column padding that pushes content right */
 @media (max-width: 480px) {
   .products-grid.container.my-4,
