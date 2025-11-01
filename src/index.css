@@ -1,6 +1,6 @@
 /* ------------------ Global ------------------ */
-/* Reset margins/padding globally to avoid unexpected offsets on small screens */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* Keep consistent box-sizing globally but do not reset margins/padding */
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
