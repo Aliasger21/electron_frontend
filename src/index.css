@@ -254,6 +254,27 @@ body {
   html, body { overflow-x: hidden; }
 }
 
+/* Center product cards and remove left padding on very small screens */
+@media (max-width: 480px) {
+  .products-grid.container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .products-grid .row {
+    justify-content: center;
+  }
+  .products-grid .col {
+    display: flex;
+    justify-content: center;
+  }
+  .products-grid .product-card {
+    width: 92vw !important;
+    max-width: 360px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
 
 /* Avatar helpers */
 .avatar-preview {
