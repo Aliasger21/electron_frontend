@@ -42,11 +42,22 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-a, .nav-link {
+a {
   color: var(--text);
   transition: color 0.3s ease;
 }
 
-a:hover, .nav-link:hover {
+a:hover {
   color: var(--accent);
+}
+
+/* User navbar links - keep white color */
+.navbar-dark .navbar-nav .nav-link,
+.navbar .navbar-nav .nav-link {
+  color: #ffffff !important;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar .navbar-nav .nav-link:hover {
+  color: var(--accent) !important;
 }

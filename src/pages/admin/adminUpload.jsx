@@ -18,6 +18,7 @@ const UploadProductPage = () => {
     const [price, setPrice] = useState("");
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("");
+    const [brand, setBrand] = useState("");
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState("");
     const [loading, setLoading] = useState(false);
@@ -55,6 +56,7 @@ const UploadProductPage = () => {
             formdata.append("price", price);
             formdata.append("description", description);
             formdata.append("category", category);
+            formdata.append("brand", brand);
             formdata.append("file", file);
 
             const res = await axios.post(
@@ -74,6 +76,7 @@ const UploadProductPage = () => {
             setPrice("");
             setDescription("");
             setCategory("");
+            setBrand("");
             setFile(null);
             setPreview("");
         } catch (err) {
@@ -190,6 +193,19 @@ const UploadProductPage = () => {
                                             </option>
                                         ))}
                                     </Form.Select>
+                                </Form.Group>
+                            </Col>
+
+                            <Col md={6}>
+                                <Form.Group controlId="brand">
+                                    <Form.Label>Brand</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Enter brand"
+                                        value={brand}
+                                        onChange={(e) => setBrand(e.target.value)}
+                                        required
+                                    />
                                 </Form.Group>
                             </Col>
 

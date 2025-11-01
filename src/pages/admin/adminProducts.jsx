@@ -116,6 +116,7 @@ function ProductsPage() {
         formData.append("price", editProduct.price);
         formData.append("description", editProduct.description);
         formData.append("category", editProduct.category);
+        formData.append("brand", editProduct.brand || "");
 
         if (editProduct.imageFile) formData.append("file", editProduct.imageFile);
 
@@ -367,7 +368,20 @@ function ProductsPage() {
                                     </Form.Group>
                                 </Col>
 
-                                <Col xs={12} md={6}>
+                                <Col xs={12} md={4}>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Price</Form.Label>
+                                        <Form.Control
+                                            type="number"
+                                            name="price"
+                                            value={editProduct.price || ""}
+                                            onChange={handleChange}
+                                            placeholder="Enter price"
+                                        />
+                                    </Form.Group>
+                                </Col>
+
+                                <Col xs={12} md={4}>
                                     <Form.Group className="mb-3">
                                         <Form.Label>Category</Form.Label>
                                         <Form.Select
@@ -383,6 +397,19 @@ function ProductsPage() {
                                                     </option>
                                                 ))}
                                         </Form.Select>
+                                    </Form.Group>
+                                </Col>
+
+                                <Col xs={12} md={4}>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Brand</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            name="brand"
+                                            value={editProduct.brand || ""}
+                                            onChange={handleChange}
+                                            placeholder="Enter brand"
+                                        />
                                     </Form.Group>
                                 </Col>
                             </Row>

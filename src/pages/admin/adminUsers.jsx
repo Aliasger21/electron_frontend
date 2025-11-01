@@ -1,6 +1,7 @@
 import { Card, Col, Row } from 'react-bootstrap';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+import Loading from '../../components/common/Loading';
 
 function UsersPage() {
     const [users, setUsers] = useState([]);
@@ -9,7 +10,7 @@ function UsersPage() {
 
     useEffect(() => {
         console.log('useEffect triggered - starting API call');
-        axios.get('http://localhost:8888/.netlify/functions/index/Userdata', {
+        axios.get('http://localhost:8888/.netlify/functions/index/getsignup', {
             headers: { 'Content-Type': 'application/json' },
         })
             .then(response => {
@@ -32,7 +33,7 @@ function UsersPage() {
             });
     }, []);
 
-    if (loading) return <p>Loading users...</p>;
+    if (loading) return <Loading message="Loading users..." />;
     if (error) return <p style={{ color: 'red' }}>{error}</p>;
 
     return (
@@ -41,13 +42,22 @@ function UsersPage() {
             <p>List of registered users ({users.length})</p>
             <Row>
                 {users.map((user, i) => (
-                    <Col lg={3} key={user._id || i}>
-                        <Card>
-                            <Card.Header>{user.name || user.username || 'N/A'}</Card.Header>
-                            <Card.Body>
-                                <p>Email: {user.email || 'N/A'}</p>
-                                <p>Verified: {user.isverify ? 'Yes' : 'No'}</p>
-                            </Card.Body>
+                    <Col lg={4} md={6} key={user._id || i}>
+                        <Card style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text)', minHeight: 140 }}>
+                            <div className="d-flex align-items-start gap-3 p-3">
+                                <img
+                                    src={user.profilePic || 'https://via.placeholder.com/80'}
+                                    alt={user.firstname || user.email}
+                                    style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 8, background: '#fff' }}
+                                />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontWeight: 700, color: '#fff', marginBottom: 6 }}>{(user.firstname || '') + (user.lastname ? ' ' + user.lastname : '') || user.email}</div>
+                                    <div style={{ color: 'var(--text-muted)', wordBreak: 'break-word' }}>{user.email || 'N/A'}</div>
+                                    <div style={{ color: 'var(--text-muted)', marginTop: 6 }}>Phone: {user.phone || 'N/A'}</div>
+                                    <div style={{ color: 'var(--text-muted)', marginTop: 6 }}>Address: {user.address || 'N/A'}</div>
+                                    <div style={{ color: user.isverify ? 'var(--success)' : 'var(--text-muted)', marginTop: 6 }}>Verified: {user.isverify ? 'Yes' : 'No'}</div>
+                                </div>
+                            </div>
                         </Card>
                     </Col>
                 ))}

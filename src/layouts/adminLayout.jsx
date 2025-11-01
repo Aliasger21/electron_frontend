@@ -30,7 +30,7 @@ export default function AdminLayout() {
                     </nav>
                 </div>
 
-                <div className="flex-grow-1">
+                <div className="flex-grow-1" style={{ backgroundColor: "var(--bg-dark)", minHeight: "100vh" }}>
                     <header>
                         <h2>{getPageTitle()}</h2>
                         <span>Welcome, Admin!</span>

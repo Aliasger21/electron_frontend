@@ -11,14 +11,13 @@ const AdminSidebar = () => {
 
     return (
         <div className="d-flex flex-column sidebar-container">
-            <h4 className="fw-bold mb-4 text-dark">Admin Panel</h4>
+            <h4 className="fw-bold mb-4" style={{ color: "var(--accent)" }}>Admin Panel</h4>
             {links.map((link) => (
                 <NavLink
                     key={link.to}
                     to={link.to}
                     className={({ isActive }) =>
-                        `btn btn-light text-dark sidebar-btn ${isActive ? "active" : ""
-                        } d-flex align-items-center gap-2`
+                        `nav-link ${isActive ? "active" : ""} d-flex align-items-center gap-2`
                     }
                 >
                     {link.icon} {link.label}

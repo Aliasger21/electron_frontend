@@ -29,7 +29,7 @@ export default function AdminHeader() {
                         {/* Menu button (2 columns) */}
                         <Col xs={2} className="d-flex justify-content-end">
                             <Button
-                                variant="light"
+                                variant="outline-light"
                                 className="menu-btn"
                                 aria-label="Open menu"
                                 onClick={() => setShow(true)}
@@ -52,7 +52,7 @@ export default function AdminHeader() {
                 <Offcanvas.Header className="offcanvas-header">
                     <Offcanvas.Title className="fw-bold">Menu</Offcanvas.Title>
                     <Button
-                        variant="light"
+                        variant="outline-light"
                         className="close-btn"
                         aria-label="Close menu"
                         onClick={() => setShow(false)}
