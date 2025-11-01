@@ -4,6 +4,7 @@ import axios from 'axios';
 import { BACKEND_API } from '../../config';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import ConfirmModal from '../../components/common/ConfirmModal';
 
 const Profile = () => {
   const [user, setUser] = useState(() => {
@@ -65,8 +66,13 @@ const Profile = () => {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!confirm('Are you sure you want to delete your account? This is permanent.')) return;
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleDeleteAccount = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteAccount = async () => {
     const token = localStorage.getItem('token');
     if (!token) { toast.info('Please login'); navigate('/login'); return; }
     try {
@@ -79,6 +85,8 @@ const Profile = () => {
     } catch (err) {
       console.error(err);
       toast.error('Failed to delete account');
+    } finally {
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -115,6 +123,15 @@ const Profile = () => {
           </Form>
         </Col>
       </Row>
+      <ConfirmModal
+        show={showDeleteConfirm}
+        title="Delete account"
+        message="Are you sure you want to permanently delete your account? This action cannot be undone."
+        onConfirm={confirmDeleteAccount}
+        onCancel={() => setShowDeleteConfirm(false)}
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </Container>
   );
 };

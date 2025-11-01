@@ -5,6 +5,7 @@ import { Table, Button, Container } from "react-bootstrap";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import Loading from '../../components/common/Loading';
+import ConfirmModal from '../../components/common/ConfirmModal';
 
 function OrdersPage() {
     const [orders, setOrders] = useState([]);
@@ -24,12 +25,27 @@ function OrdersPage() {
         fetchOrders();
     }, []);
 
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
     const updateStatus = async (id, status) => {
         try {
             await axios.put(`${BACKEND_API}/orders/${id}/status`, { status });
             setOrders((prev) => prev.map(o => o._id === id ? { ...o, status } : o));
         } catch (err) {
             console.error(err);
+        }
+    };
+
+    const handleConfirmDelete = async () => {
+        const id = confirmDeleteId;
+        if (!id) return setConfirmDeleteId(null);
+        try {
+            await axios.delete(`${BACKEND_API}/orders/${id}`);
+            setOrders(prev => prev.filter(x => x._id !== id));
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setConfirmDeleteId(null);
         }
     };
 
@@ -79,7 +95,7 @@ function OrdersPage() {
                             <div className="d-flex gap-2 mt-3">
                                 <Button size="sm" variant="outline-light" onClick={() => updateStatus(o._id, 'processing')}>Processing</Button>
                                 <Button size="sm" variant="outline-success" onClick={() => updateStatus(o._id, 'completed')}>Complete</Button>
-                                <Button size="sm" variant="outline-danger" onClick={async () => { if (confirm('Delete this order?')) { try { await axios.delete(`${BACKEND_API}/orders/${o._id}`); setOrders(prev => prev.filter(x => x._id !== o._id)); } catch (err) { console.error(err); } } }}>Delete</Button>
+                                <Button size="sm" variant="outline-danger" onClick={() => setConfirmDeleteId(o._id)}>Delete</Button>
                                 {o.status !== 'cancelled' && (
                                     <Button size="sm" variant="warning" onClick={() => updateStatus(o._id, 'cancelled')}>Cancel</Button>
                                 )}
@@ -101,6 +117,15 @@ function OrdersPage() {
                     ))}
                 </div>
             )}
+            <ConfirmModal
+                show={!!confirmDeleteId}
+                title="Delete order"
+                message="Are you sure you want to delete this order? This action cannot be undone."
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setConfirmDeleteId(null)}
+                confirmText="Delete"
+                cancelText="Cancel"
+            />
         </Container>
     );
 }
