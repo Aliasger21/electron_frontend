@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
 import AdminHeader from "../components/admin/adminHeader";
-import AdminSidebar from "../components/admin/AdminSidebar";
+import AdminSidebar from "../components/admin/adminSidebar";
 import "./admin.css"; // ensure your theme file is imported (path as needed)
 
 export default function AdminLayout() {
