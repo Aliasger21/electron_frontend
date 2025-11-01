@@ -98,8 +98,8 @@ const Profile = () => {
     <Container className="py-5">
       <Row>
         <Col md={4} className="text-center">
-          <div style={{ width: 200, height: 200, margin: '0 auto', background: '#fff', borderRadius: 12, padding: 10 }}>
-            <Image src={preview || 'https://via.placeholder.com/180'} rounded style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div className="avatar-preview">
+            <img src={preview || 'https://via.placeholder.com/180'} alt="profile" />
           </div>
           <Form.Group className="mt-3">
             <Form.Label style={{ color: 'var(--text)' }}>Change Profile Picture</Form.Label>

@@ -60,11 +60,11 @@ const Header = () => {
                     >
                         {cart.length === 0 ? (
                             <NavDropdown.ItemText>Your cart is empty</NavDropdown.ItemText>
-                        ) : (
-                            <div style={{ minWidth: 300 }}>
+                            ) : (
+                            <div className="cart-dropdown-panel">
                                 {cart.slice(0, 5).map((it) => (
                                     <NavDropdown.ItemText key={it._id} className="d-flex align-items-center gap-2">
-                                        <Image src={it.image || 'https://via.placeholder.com/50'} rounded style={{ width: 50, height: 50, objectFit: 'contain' }} />
+                                    <img src={it.image || 'https://via.placeholder.com/50'} alt={it.productname} className="avatar-xs" />
                                         <div style={{ flex: 1 }}>
                                             <div style={{ color: '#fff', fontSize: '0.9rem' }}>{it.productname}</div>
                                             <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Qty: {it.qty}</div>
@@ -88,7 +88,7 @@ const Header = () => {
                             align="end"
                             title={
                                 <span className="d-flex align-items-center gap-2">
-                                    <Image src={user.profilePic || 'https://via.placeholder.com/40'} roundedCircle style={{ width: 36, height: 36, objectFit: 'cover' }} />
+                                    <img src={user.profilePic || 'https://via.placeholder.com/40'} alt="user" className="avatar-xxs" />
                                     <span style={{ color: '#fff', fontWeight: 600 }}>{user.firstname || user.email}</span>
                                 </span>
                             }

@@ -16,7 +16,7 @@ const Loading = ({ fullScreen = false, message = 'Loading...' }) => {
     return (
         <div style={containerStyle}>
             <div style={boxStyle}>
-                <div className="spinner-border text-info" role="status" style={{ width: 48, height: 48 }}>
+                <div className="spinner-border text-info loading-spinner" role="status">
                     <span className="visually-hidden">Loading...</span>
                 </div>
                 {message && <div style={{ marginTop: 12, color: 'var(--text-muted)' }}>{message}</div>}

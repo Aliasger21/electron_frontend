@@ -222,16 +222,7 @@ const UploadProductPage = () => {
                             {preview && (
                                 <Col xs={12} className="text-center mt-3">
                                     <div className="d-inline-block border rounded-4 p-2 bg-light">
-                                        <img
-                                            src={preview}
-                                            alt="Preview"
-                                            style={{
-                                                width: "200px",
-                                                height: "200px",
-                                                objectFit: "cover",
-                                                borderRadius: "12px",
-                                            }}
-                                        />
+                                        <img src={preview} alt="Preview" className="preview-img" />
                                     </div>
                                     <p className="text-muted small mt-2">Image Preview</p>
                                 </Col>

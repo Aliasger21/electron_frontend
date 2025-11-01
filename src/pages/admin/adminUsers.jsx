@@ -49,7 +49,8 @@ function UsersPage() {
                                 <img
                                     src={user.profilePic || 'https://via.placeholder.com/80'}
                                     alt={user.firstname || user.email}
-                                    style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 8, background: '#fff' }}
+                                    className="avatar-sm"
+                                    style={{ background: '#fff' }}
                                 />
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ fontWeight: 700, color: '#fff', marginBottom: 6 }}>{(user.firstname || '') + (user.lastname ? ' ' + user.lastname : '') || user.email}</div>
