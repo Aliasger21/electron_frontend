@@ -215,7 +215,7 @@ function ProductsPage() {
             {filteredProducts.length === 0 ? (
                 <p className="text-muted text-center">No products found.</p>
             ) : (
-                <Row xs={1} sm={2} md={3} lg={3} className="g-4">
+                <Row xs={1} sm={2} md={2} lg={3} className="g-4">
                     {filteredProducts.map((p) => {
                         const imageUrl =
                             p.image || "https://via.placeholder.com/300x220?text=No+Image";

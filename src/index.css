@@ -206,6 +206,20 @@ body {
   .order-status { white-space: normal; font-size: 0.75rem; }
 }
 
+/* Force product cards and images to never exceed container width */
+.product-card { max-width: 100% !important; }
+.product-card * { max-width: 100% !important; box-sizing: border-box; }
+.product-image { width: 100% !important; }
+.product-image img { width: 100% !important; height: auto !important; object-fit: cover; }
+
+/* Prevent Bootstrap row gutters causing horizontal overflow */
+.products-grid .row {
+  margin-left: 0; margin-right: 0;
+}
+.products-grid .row > [class*="col-"] {
+  padding-left: .5rem; padding-right: .5rem;
+}
+
 
 /* Avatar helpers */
 .avatar-preview {
