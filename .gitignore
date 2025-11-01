@@ -25,5 +25,6 @@ dist-ssr
 
 # Ignore node_modules file when uploading to github
 /node_modules
+/backend
 # Local Netlify folder
 .netlify
