@@ -275,6 +275,25 @@ body {
   }
 }
 
+/* Remove any remaining container/column padding that pushes content right */
+@media (max-width: 480px) {
+  .products-grid.container.my-4,
+  .products-grid.container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .products-grid.container .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .products-grid.container [class*="col-"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
 
 /* Avatar helpers */
 .avatar-preview {
