@@ -1,0 +1,52 @@
+/* Custom Theme */
+@import "@fontsource/poppins";
+
+:root {
+  --primary: #0d6efd;
+  --accent: #00b4d8;
+  --bg-dark: #0a0a0a;
+  --bg-card: #121212;
+  --text: #f1f1f1;
+  --text-muted: #a3a3a3;
+  --success: #38b000;
+  --error: #ff3b30;
+  --border: #1f1f1f;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text);
+  font-family: "Poppins", sans-serif;
+}
+
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.navbar, footer {
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+
+a, .nav-link {
+  color: var(--text);
+  transition: color 0.3s ease;
+}
+
+a:hover, .nav-link:hover {
+  color: var(--accent);
+}

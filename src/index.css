@@ -1,0 +1,142 @@
+/* ------------------ Global ------------------ */
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f8f9fa;
+  overflow-y: scroll; /* always reserve vertical scrollbar */
+}
+
+/* ------------------ Layout Container ------------------ */
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ------------------ Sidebar (Desktop Only) ------------------ */
+.admin-sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background-color: #ffeb3b; /* brighter yellow */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1050;
+  transition: transform 0.3s ease, width 0.3s ease;
+  padding: 20px 15px;
+  box-sizing: border-box;
+}
+
+.sidebar-container {
+  height: 100%;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #212529;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.sidebar-link:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-link.active {
+  background-color: #fff;
+  color: #212529;
+  font-weight: 600;
+}
+
+.sidebar-btn {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.sidebar-btn.active {
+  background-color: #fff !important;
+  color: #000 !important;
+  border-left: 5px solid #000;
+}
+
+/* ------------------ Main Content ------------------ */
+.admin-content {
+  flex: 1;
+  margin-left: 240px;
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ------------------ Mobile View ------------------ */
+@media (max-width: 767px) {
+  /* Hide sidebar completely */
+  .admin-sidebar {
+    display: none;
+  }
+
+  /* Main content full width */
+  .admin-content {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  /* Mobile Header */
+  .mobile-header {
+  width: 100%;
+  z-index: 1050;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  box-sizing: border-box;
+}
+
+  /* Scrollable nav buttons */
+  .mobile-nav-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+  }
+
+.active-menu-btn {
+  background-color: #ffd700 !important; /* darker yellow */
+  color: #000 !important; /* keep text readable */
+  border-left: 5px solid #000; /* consistent with sidebar */
+}
+
+  /* Hide scrollbar but allow scrolling */
+  .mobile-nav-buttons::-webkit-scrollbar {
+    display: none;
+  }
+  .mobile-nav-buttons {
+    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  /* Optional: adjust button size for very small screens */
+  @media (max-width: 400px) {
+    .mobile-nav-buttons .btn {
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+  }
+}
+
+.nav-hover:hover {
+  color: var(--accent) !important;
+  text-shadow: 0 0 8px var(--accent);
+}
