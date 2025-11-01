@@ -149,53 +149,54 @@ const Products = () => {
                 <Col md={6} className="mb-2">
                     <h2 style={{ color: "#ffffff" }}>Products</h2>
                 </Col>
-                <Col md={6} className="d-flex gap-2 justify-content-md-end align-items-center">
-                    <Form.Select
-                        value={category}
-                        onChange={(e) => { setCategory(e.target.value); setPage(1); }}
-                        style={{ maxWidth: "220px", backgroundColor: "var(--bg-card)", color: "#fff", border: "1px solid var(--border)" }}
-                    >
-                        <option value="">All categories</option>
-                        {categories.map((c) => (
-                            <option key={c} value={c}>
-                                {c[0].toUpperCase() + c.slice(1)}
-                            </option>
-                        ))}
-                    </Form.Select>
+                <Col md={6}>
+                    <div className="filters d-flex gap-2 justify-content-md-end align-items-center flex-wrap">
+                        <Form.Select
+                            value={category}
+                            onChange={(e) => { setCategory(e.target.value); setPage(1); }}
+                            className="filter-control"
+                        >
+                            <option value="">All categories</option>
+                            {categories.map((c) => (
+                                <option key={c} value={c}>
+                                    {c[0].toUpperCase() + c.slice(1)}
+                                </option>
+                            ))}
+                        </Form.Select>
 
-                    {/* Brand filter (derived from products) */}
-                    <Form.Select
-                        value={brand}
-                        onChange={(e) => { setBrand(e.target.value); setPage(1); }}
-                        style={{ maxWidth: "200px", backgroundColor: "var(--bg-card)", color: "#fff", border: "1px solid var(--border)" }}
-                    >
-                        <option value="">All brands</option>
-                        {Array.from(new Set(products.map(p => (p.brand || "").toLowerCase()).filter(Boolean))).map(b => (
-                            <option key={b} value={b}>{b[0].toUpperCase() + b.slice(1)}</option>
-                        ))}
-                    </Form.Select>
+                        <Form.Select
+                            value={brand}
+                            onChange={(e) => { setBrand(e.target.value); setPage(1); }}
+                            className="filter-control"
+                        >
+                            <option value="">All brands</option>
+                            {Array.from(new Set(products.map(p => (p.brand || '').toLowerCase()).filter(Boolean))).map(b => (
+                                <option key={b} value={b}>{b[0].toUpperCase() + b.slice(1)}</option>
+                            ))}
+                        </Form.Select>
 
-                    <Form.Control
-                        type="search"
-                        placeholder="Search products"
-                        value={search}
-                        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                        style={{ maxWidth: "300px", backgroundColor: "var(--bg-card)", color: "#fff", border: "1px solid var(--border)" }}
-                    />
+                        <Form.Control
+                            type="search"
+                            placeholder="Search products"
+                            value={search}
+                            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                            className="filter-control"
+                        />
 
-                    <Form.Select
-                        value={perPage}
-                        onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
-                        style={{ maxWidth: "120px", backgroundColor: "var(--bg-card)", color: "#fff", border: "1px solid var(--border)" }}
-                    >
-                        <option value={8}>8 / page</option>
-                        <option value={12}>12 / page</option>
-                        <option value={24}>24 / page</option>
-                    </Form.Select>
+                        <Form.Select
+                            value={perPage}
+                            onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
+                            className="filter-control"
+                        >
+                            <option value={8}>8 / page</option>
+                            <option value={12}>12 / page</option>
+                            <option value={24}>24 / page</option>
+                        </Form.Select>
 
-                    <Button variant="outline-light" onClick={() => { setSearch(""); setCategory(""); setBrand(""); }}>
-                        Reset
-                    </Button>
+                        <Button variant="outline-light" onClick={() => { setSearch(""); setCategory(""); setBrand(""); }}>
+                            Reset
+                        </Button>
+                    </div>
                 </Col>
             </Row>
 

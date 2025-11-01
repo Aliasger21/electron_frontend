@@ -151,6 +151,20 @@ body {
   box-sizing: border-box;
 }
 
+/* filter controls styling */
+.filters .filter-control {
+  background-color: var(--bg-card);
+  color: #fff;
+  border: 1px solid var(--border);
+  max-width: 220px;
+}
+
+@media (max-width: 480px) {
+  .filters { display: flex; flex-direction: column; gap: 8px; }
+  .filters .filter-control { max-width: 100% !important; width: 100% !important; }
+  .filters button { width: 100%; }
+}
+
 .responsive-img {
   width: 100%;
   height: auto;

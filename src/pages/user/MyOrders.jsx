@@ -26,9 +26,9 @@ const MyOrders = () => {
     if (!confirm('Cancel this order?')) return;
     const token = localStorage.getItem('token');
     try {
-      await axios.post(`${BACKEND_API}/orders/${id}/cancel`, {}, { headers: { Authorization: token } });
+      const res = await axios.post(`${BACKEND_API}/orders/${id}/cancel`, {}, { headers: { Authorization: token } });
       setOrders(prev => prev.map(o => o._id === id ? { ...o, status: 'cancelled' } : o));
-      toast.success('Order cancelled');
+      toast.success(res.data?.message || 'Order cancelled');
     } catch (err) { console.error(err); toast.error('Failed to cancel'); }
   };
 

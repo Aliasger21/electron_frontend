@@ -105,8 +105,15 @@ function OrdersPage() {
                                         onChange={(date) => {
                                             const val = date ? date.toISOString() : null;
                                             axios.put(`${BACKEND_API}/orders/${o._id}/eta`, { estimatedDelivery: val }, { headers: { Authorization: localStorage.getItem('token') || '' } })
-                                                .then(res => setOrders(prev => prev.map(p => p._id === o._id ? res.data.order : p)))
-                                                .catch(err => console.error(err));
+                                                .then(res => {
+                                                    setOrders(prev => prev.map(p => p._id === o._id ? res.data.order : p));
+                                                    // optional feedback for admin
+                                                })
+                                                .catch(err => {
+                                                    console.error(err);
+                                                    // show a toast if available
+                                                    try { window.dispatchEvent(new CustomEvent('showToast', { detail: { message: 'Failed to update ETA', variant: 'danger' } })); } catch(e){}
+                                                });
                                         }}
                                         placeholderText="Set ETA"
                                         className="form-control form-control-sm"
