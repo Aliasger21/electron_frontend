@@ -213,7 +213,7 @@ body {
 .product-card { max-width: 100% !important; }
 .product-card * { max-width: 100% !important; box-sizing: border-box; }
 .product-image { width: 100% !important; }
-.product-image img { width: 100% !important; height: auto !important; object-fit: cover; }
+.product-image img { width: 100% !important; height: auto !important; object-fit: contain !important; }
 
 /* Prevent Bootstrap row gutters causing horizontal overflow */
 .products-grid .row {
@@ -240,6 +240,7 @@ body {
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
+  object-fit: contain !important;
   display: block !important;
 }
 
