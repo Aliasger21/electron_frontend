@@ -243,7 +243,12 @@ function ProductsPage() {
                                     {/* 🖼 Updated image section */}
                                     <div className="position-relative">
                                         <div className="product-image">
-                                            <img className="responsive-img" src={imageUrl} alt={name} style={{ borderRadius: "10px" }} />
+                                            <img
+                                                className="responsive-img"
+                                                src={imageUrl}
+                                                alt={name}
+                                                style={{ borderRadius: "10px", width: '100%', height: 'auto', objectFit: 'contain' }}
+                                            />
                                         </div>
                                         <Badge
                                             bg="primary"
