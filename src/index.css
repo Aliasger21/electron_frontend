@@ -220,6 +220,11 @@ body {
   padding-left: .5rem; padding-right: .5rem;
 }
 
+/* additional clamps to prevent images/cards exceeding viewport */
+.products-grid { padding-left: 8px; padding-right: 8px; box-sizing: border-box; }
+.products-grid .product-card { max-width: calc(100vw - 16px) !important; margin-left: auto; margin-right: auto; }
+.products-grid .product-image img { max-width: calc(100vw - 32px) !important; }
+
 
 /* Avatar helpers */
 .avatar-preview {
