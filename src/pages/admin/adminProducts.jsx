@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { BACKEND_API } from '../../config';
 import {
     Card,
     Button,
@@ -45,9 +46,7 @@ function ProductsPage() {
     useEffect(() => {
         async function fetchProducts() {
             try {
-                const res = await axios.get(
-                    "http://localhost:8888/.netlify/functions/index/products"
-                );
+                const res = await axios.get(`${BACKEND_API}/products`);
                 const fetched = res.data.products || [];
                 setProducts(fetched);
                 setFilteredProducts(fetched);
@@ -77,9 +76,7 @@ function ProductsPage() {
         if (!deleteConfirm.id) return;
         try {
             setActionLoading(true);
-            await axios.delete(
-                `http://localhost:8888/.netlify/functions/index/products/${deleteConfirm.id}`
-            );
+            await axios.delete(`${BACKEND_API}/products/${deleteConfirm.id}`);
             setProducts(products.filter((p) => p._id !== deleteConfirm.id));
             setFilteredProducts(filteredProducts.filter((p) => p._id !== deleteConfirm.id));
             showToast("🗑 Product deleted successfully", "success");
@@ -122,11 +119,7 @@ function ProductsPage() {
 
         setActionLoading(true);
         try {
-            const res = await axios.put(
-                `http://localhost:8888/.netlify/functions/index/products/${editProduct._id}`,
-                formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
-            );
+            const res = await axios.put(`${BACKEND_API}/products/${editProduct._id}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
 
             const updated =
                 res.data.updatedProduct ||

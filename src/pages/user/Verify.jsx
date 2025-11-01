@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { BACKEND_API } from '../../config';
 import { toast } from 'react-toastify';
 
 const Verify = () => {
@@ -15,8 +16,7 @@ const Verify = () => {
       return;
     }
 
-    const backendBase = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_BACKEND_URL) ? import.meta.env.VITE_BACKEND_URL : 'http://localhost:8888';
-    const backendVerify = `${backendBase}/.netlify/functions/index/verify-email?token=${token}`;
+    const backendVerify = `${BACKEND_API}/verify-email?token=${token}`;
 
     (async () => {
       try {

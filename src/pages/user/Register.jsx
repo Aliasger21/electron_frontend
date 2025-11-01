@@ -1,6 +1,7 @@
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { useState } from 'react';
 import axios from 'axios';
+import { BACKEND_API } from '../../config';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,7 +19,7 @@ const Register = () => {
         if (loading) return;
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:8888/.netlify/functions/index/signup', { firstname, lastname, email, password });
+            const res = await axios.post(`${BACKEND_API}/signup`, { firstname, lastname, email, password });
             toast.success('Verification email sent — please check your inbox');
             navigate('/login');
         } catch (err) {

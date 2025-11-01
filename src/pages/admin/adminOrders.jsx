@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { BACKEND_API } from '../../config';
 import { Table, Button, Container } from "react-bootstrap";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -12,7 +13,7 @@ function OrdersPage() {
     useEffect(() => {
         async function fetchOrders() {
             try {
-                const res = await axios.get("http://localhost:8888/.netlify/functions/index/orders");
+                const res = await axios.get(`${BACKEND_API}/orders`);
                 setOrders(res.data.orders || []);
             } catch (err) {
                 console.error(err);
@@ -25,7 +26,7 @@ function OrdersPage() {
 
     const updateStatus = async (id, status) => {
         try {
-            await axios.put(`http://localhost:8888/.netlify/functions/index/orders/${id}/status`, { status });
+            await axios.put(`${BACKEND_API}/orders/${id}/status`, { status });
             setOrders((prev) => prev.map(o => o._id === id ? { ...o, status } : o));
         } catch (err) {
             console.error(err);
@@ -78,7 +79,7 @@ function OrdersPage() {
                             <div className="d-flex gap-2 mt-3">
                                 <Button size="sm" variant="outline-light" onClick={() => updateStatus(o._id, 'processing')}>Processing</Button>
                                 <Button size="sm" variant="outline-success" onClick={() => updateStatus(o._id, 'completed')}>Complete</Button>
-                                <Button size="sm" variant="outline-danger" onClick={async () => { if (confirm('Delete this order?')) { try { await axios.delete(`http://localhost:8888/.netlify/functions/index/orders/${o._id}`); setOrders(prev => prev.filter(x => x._id !== o._id)); } catch (err) { console.error(err); } } }}>Delete</Button>
+                                <Button size="sm" variant="outline-danger" onClick={async () => { if (confirm('Delete this order?')) { try { await axios.delete(`${BACKEND_API}/orders/${o._id}`); setOrders(prev => prev.filter(x => x._id !== o._id)); } catch (err) { console.error(err); } } }}>Delete</Button>
                                 {o.status !== 'cancelled' && (
                                     <Button size="sm" variant="warning" onClick={() => updateStatus(o._id, 'cancelled')}>Cancel</Button>
                                 )}
@@ -87,7 +88,7 @@ function OrdersPage() {
                                         selected={o.estimatedDelivery ? new Date(o.estimatedDelivery) : null}
                                         onChange={(date) => {
                                             const val = date ? date.toISOString() : null;
-                                            axios.put(`http://localhost:8888/.netlify/functions/index/orders/${o._id}/eta`, { estimatedDelivery: val }, { headers: { Authorization: localStorage.getItem('token') || '' } })
+                                            axios.put(`${BACKEND_API}/orders/${o._id}/eta`, { estimatedDelivery: val }, { headers: { Authorization: localStorage.getItem('token') || '' } })
                                                 .then(res => setOrders(prev => prev.map(p => p._id === o._id ? res.data.order : p)))
                                                 .catch(err => console.error(err));
                                         }}

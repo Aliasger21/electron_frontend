@@ -2,6 +2,7 @@ import { Container, Row, Col, Button, Card, Badge, Spinner } from "react-bootstr
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { BACKEND_API } from '../../config';
 
 const Home = () => {
     const [products, setProducts] = useState([]);
@@ -76,9 +77,7 @@ const Home = () => {
     useEffect(() => {
         async function fetchProducts() {
             try {
-                const res = await axios.get(
-                    "http://localhost:8888/.netlify/functions/index/products"
-                );
+                const res = await axios.get(`${BACKEND_API}/products`);
                 const fetched = res.data.products || [];
 
                 // Get one product from each category

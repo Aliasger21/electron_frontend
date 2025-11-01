@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from 'react-router-dom';
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { BACKEND_API } from '../../config';
 
 const Products = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -46,7 +47,7 @@ const Products = () => {
                 if (category) params.category = category;
                 if (brand) params.brand = brand;
                 if (search) params.search = search;
-                const res = await axios.get("http://localhost:8888/.netlify/functions/index/products", { params });
+                const res = await axios.get(`${BACKEND_API}/products`, { params });
                 const fetched = res.data.products || [];
                 setProducts(fetched);
                 setTotal(res.data.total || 0);

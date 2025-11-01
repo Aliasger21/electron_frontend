@@ -3,6 +3,7 @@ import { useCart } from "../../context/CartContext";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { BACKEND_API } from '../../config';
 import { toast } from 'react-toastify';
 import { useLoading } from '../../context/LoadingContext';
 
@@ -58,7 +59,7 @@ const Checkout = () => {
     try {
       const payload = { items: cart.map(({ _id, productname, price, qty }) => ({ productId: _id, productname, price, qty })), customer };
       const headers = { Authorization: token };
-      const res = await axios.post('http://localhost:8888/.netlify/functions/index/orders', payload, { headers });
+      const res = await axios.post(`${BACKEND_API}/orders`, payload, { headers });
       toast.success('Order placed successfully');
       clearCart();
       navigate('/');

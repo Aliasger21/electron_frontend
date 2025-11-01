@@ -1,6 +1,7 @@
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { useState } from 'react';
 import axios from 'axios';
+import { BACKEND_API } from '../../config';
 import { toast } from 'react-toastify';
 import { useLoading } from '../../context/LoadingContext';
 
@@ -15,7 +16,7 @@ const Contact = () => {
     if (!form.name || !form.email || !form.message) return toast.error('All fields are required');
     try {
       showLoading('Sending message...');
-      await axios.post('http://localhost:8888/.netlify/functions/index/contact', form);
+      await axios.post(`${BACKEND_API}/contact`, form);
       toast.success('Message sent — we will contact you shortly');
       setForm({ name: '', email: '', message: '' });
     } catch (err) {

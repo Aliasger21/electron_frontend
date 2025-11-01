@@ -1,6 +1,7 @@
 import { Container, Row, Col, Form, Button, Image } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { BACKEND_API } from '../../config';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,7 +19,7 @@ const Profile = () => {
     if (!token) return;
     (async () => {
       try {
-        const res = await axios.post('http://localhost:8888/.netlify/functions/index/authverify', {}, { headers: { Authorization: token } });
+        const res = await axios.post(`${BACKEND_API}/authverify`, {}, { headers: { Authorization: token } });
         // backend returns { status: true, data: { message, data: user } }
         const u = res.data?.data?.data || res.data?.data || res.data;
         if (u) {
@@ -47,11 +48,11 @@ const Profile = () => {
     if (!token) { toast.info('Please login'); navigate('/login'); return; }
     try {
       // update fields
-      const res = await axios.put(`http://localhost:8888/.netlify/functions/index/updatesignup/${user._id}`, form, { headers: { Authorization: token } });
+      const res = await axios.put(`${BACKEND_API}/updatesignup/${user._id}`, form, { headers: { Authorization: token } });
       // upload file if any
       if (file) {
         const fd = new FormData(); fd.append('file', file);
-        const r2 = await axios.post(`http://localhost:8888/.netlify/functions/index/updatesignup/${user._id}/photo`, fd, { headers: { Authorization: token, 'Content-Type': 'multipart/form-data' } });
+        const r2 = await axios.post(`${BACKEND_API}/updatesignup/${user._id}/photo`, fd, { headers: { Authorization: token, 'Content-Type': 'multipart/form-data' } });
         form.profilePic = r2.data.data.profilePic;
       }
       const updatedUser = { ...user, ...form };
@@ -69,7 +70,7 @@ const Profile = () => {
     const token = localStorage.getItem('token');
     if (!token) { toast.info('Please login'); navigate('/login'); return; }
     try {
-      await axios.delete(`http://localhost:8888/.netlify/functions/index/deletesignup/${user._id}`, { headers: { Authorization: token } });
+      await axios.delete(`${BACKEND_API}/deletesignup/${user._id}`, { headers: { Authorization: token } });
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.dispatchEvent(new Event('authChanged'));

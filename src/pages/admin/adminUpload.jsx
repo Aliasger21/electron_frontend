@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { BACKEND_API } from '../../config';
 import {
     Container,
     Form,
@@ -59,10 +60,7 @@ const UploadProductPage = () => {
             formdata.append("brand", brand);
             formdata.append("file", file);
 
-            const res = await axios.post(
-                "http://localhost:8888/.netlify/functions/index/Users",
-                formdata
-            );
+            const res = await axios.post(`${BACKEND_API}/Users`, formdata);
 
             toast.success("✅ Product uploaded successfully!", {
                 position: "top-right",

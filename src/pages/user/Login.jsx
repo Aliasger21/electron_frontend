@@ -1,6 +1,7 @@
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { useState } from 'react';
 import axios from 'axios';
+import { BACKEND_API } from '../../config';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,7 +17,7 @@ const Login = () => {
         if (loading) return;
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:8888/.netlify/functions/index/loginsignup', { email, password });
+            const res = await axios.post(`${BACKEND_API}/loginsignup`, { email, password });
             // backend returns: { status: true, data: { message, data: userObj, token } }
             const payload = res.data && res.data.data ? res.data.data : {};
             const token = payload.token || res.data.token;
@@ -46,7 +47,7 @@ const Login = () => {
     const resendVerification = async () => {
         if (!email) { toast.info('Enter your email above to resend verification'); return; }
         try {
-            await axios.post('http://localhost:8888/.netlify/functions/index/resend-verification', { email });
+            await axios.post(`${BACKEND_API}/resend-verification`, { email });
             toast.success('Verification email resent');
         } catch (err) {
             console.error(err);

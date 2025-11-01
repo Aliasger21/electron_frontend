@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from 'react-toastify';
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
+import { BACKEND_API } from '../../config';
 import Loading from '../../components/common/Loading';
 import { useCart } from "../../context/CartContext";
 
@@ -16,7 +17,7 @@ const ProductDetail = () => {
     useEffect(() => {
         async function fetchProduct() {
             try {
-                const res = await axios.get(`http://localhost:8888/.netlify/functions/index/products/${id}`);
+                const res = await axios.get(`${BACKEND_API}/products/${id}`);
                 setProduct(res.data.product);
             } catch (err) {
                 console.error(err);

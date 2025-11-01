@@ -1,5 +1,6 @@
 import { Container, Row, Col, Button, Badge } from 'react-bootstrap';
 import axios from 'axios';
+import { BACKEND_API } from '../../config';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import Loading from '../../components/common/Loading';
@@ -13,7 +14,7 @@ const MyOrders = () => {
       const token = localStorage.getItem('token');
       if (!token) { setLoading(false); return; }
       try {
-        const res = await axios.get('http://localhost:8888/.netlify/functions/index/orders/my', { headers: { Authorization: token } });
+        const res = await axios.get(`${BACKEND_API}/orders/my`, { headers: { Authorization: token } });
         setOrders(res.data.orders || []);
       } catch (err) { console.error(err); toast.error('Failed to load orders'); }
       finally { setLoading(false); }
@@ -25,7 +26,7 @@ const MyOrders = () => {
     if (!confirm('Cancel this order?')) return;
     const token = localStorage.getItem('token');
     try {
-      await axios.post(`http://localhost:8888/.netlify/functions/index/orders/${id}/cancel`, {}, { headers: { Authorization: token } });
+      await axios.post(`${BACKEND_API}/orders/${id}/cancel`, {}, { headers: { Authorization: token } });
       setOrders(prev => prev.map(o => o._id === id ? { ...o, status: 'cancelled' } : o));
       toast.success('Order cancelled');
     } catch (err) { console.error(err); toast.error('Failed to cancel'); }

@@ -1,5 +1,6 @@
 import { Card, Col, Row } from 'react-bootstrap';
 import axios from 'axios';
+import { BACKEND_API } from '../../config';
 import { useState, useEffect } from 'react';
 import Loading from '../../components/common/Loading';
 
@@ -10,7 +11,7 @@ function UsersPage() {
 
     useEffect(() => {
         console.log('useEffect triggered - starting API call');
-        axios.get('http://localhost:8888/.netlify/functions/index/getsignup', {
+        axios.get(`${BACKEND_API}/getsignup`, {
             headers: { 'Content-Type': 'application/json' },
         })
             .then(response => {
