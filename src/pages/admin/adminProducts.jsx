@@ -163,7 +163,7 @@ function ProductsPage() {
         );
 
     return (
-        <div className="container my-4">
+        <div className="container my-4 products-grid">
             {actionLoading && (
                 <div
                     style={{
@@ -227,7 +227,6 @@ function ProductsPage() {
                         return (
                             <Col key={p._id}>
                                 <Card
-                                    className="h-100 shadow-lg border-0 rounded-4 overflow-hidden"
                                     style={{ transition: "transform 0.3s ease, box-shadow 0.3s ease" }}
                                     className="product-card h-100 shadow-lg border-0 rounded-4 overflow-hidden"
                                     onMouseEnter={(e) => {

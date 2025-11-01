@@ -192,6 +192,17 @@ body {
   .order-card .ms-auto { margin-left: 0 !important; }
 }
 
+/* Prevent horizontal overflow and force breaks where needed */
+.products-grid { overflow-x: hidden; }
+.product-card { box-sizing: border-box; width: 100%; }
+.product-card .card-title, .product-card .card-text { overflow-wrap: break-word; word-break: break-word; }
+.product-image img { max-width: 100%; height: auto; display: block; }
+
+.order-status { white-space: nowrap; display: inline-block; padding: .25rem .5rem; max-width: 100%; }
+@media (max-width: 480px) {
+  .order-status { white-space: normal; font-size: 0.75rem; }
+}
+
 
 /* Avatar helpers */
 .avatar-preview {

@@ -35,17 +35,17 @@ const MyOrders = () => {
   return (
     <Container className="py-5">
       <h3 style={{ color: '#fff' }}>My Orders</h3>
-      {loading ? <Loading message="Loading your orders..." /> : orders.length === 0 ? <p style={{ color: 'var(--text-muted)' }}>No orders yet</p> : (
+            {loading ? <Loading message="Loading your orders..." /> : orders.length === 0 ? <p style={{ color: 'var(--text-muted)' }}>No orders yet</p> : (
         <Row className="g-3">
           {orders.map(o => (
             <Col md={6} key={o._id}>
-              <div style={{ background: 'var(--bg-card)', padding: 16, borderRadius: 12, border: '1px solid var(--border)' }}>
-                <div className="d-flex justify-content-between align-items-center">
+              <div className="order-card">
+                <div className="order-top">
                   <div>
                     <div style={{ color: '#fff', fontWeight: 700 }}>Order #{o._id}</div>
                     <div style={{ color: 'var(--text-muted)' }}>{new Date(o.createdAt).toLocaleString()}</div>
                   </div>
-                  <Badge bg={o.status === 'completed' ? 'success' : o.status === 'cancelled' ? 'secondary' : 'warning'}>{o.status}</Badge>
+                  <Badge className="order-status" bg={o.status === 'completed' ? 'success' : o.status === 'cancelled' ? 'secondary' : 'warning'}>{o.status}</Badge>
                 </div>
                 <div style={{ marginTop: 12 }}>
                   {o.items.map(it => (
