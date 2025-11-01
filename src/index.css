@@ -255,6 +255,8 @@ body {
   .products-grid, .products-grid .row, .products-grid .col, .product-card, .product-image { max-width: 100vw !important; box-sizing: border-box; }
   .product-image { overflow: hidden; }
   html, body { overflow-x: hidden; }
+  /* show full image on small screens instead of cropping */
+  .product-image img { object-fit: contain !important; height: auto !important; }
 }
 
 /* Center product cards and remove left padding on very small screens */
