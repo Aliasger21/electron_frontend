@@ -225,6 +225,28 @@ body {
 .products-grid .product-card { max-width: calc(100vw - 16px) !important; margin-left: auto; margin-right: auto; }
 .products-grid .product-image img { max-width: calc(100vw - 32px) !important; }
 
+/* Ensure flex children can shrink to avoid overflow */
+.products-grid .col {
+  min-width: 0; /* allows flex items to shrink */
+}
+
+/* Strong image clamps for any remaining cases */
+.products-grid img.responsive-img,
+.product-image img,
+.products-grid img {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+}
+
+/* Reduce card horizontal padding on very small screens */
+@media (max-width: 420px) {
+  .products-grid { padding-left: 6px; padding-right: 6px; }
+  .products-grid .col { padding-left: 4px; padding-right: 4px; }
+  .product-card { padding-left: 0.25rem; padding-right: 0.25rem; }
+}
+
 
 /* Avatar helpers */
 .avatar-preview {
