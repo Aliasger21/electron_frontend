@@ -59,8 +59,8 @@ function OrdersPage() {
             ) : (
                 <div className="d-flex flex-column gap-3">
                     {orders.map((o) => (
-                        <div key={o._id} style={{ background: 'var(--bg-card)', padding: 16, borderRadius: 10, border: '1px solid var(--border)' }}>
-                            <div className="d-flex justify-content-between align-items-start">
+                        <div key={o._id} className="order-card">
+                            <div className="order-top">
                                 <div>
                                     <div style={{ color: '#fff', fontWeight: 700 }}>Order #{o._id}</div>
                                     <div style={{ color: 'var(--text-muted)' }}>{o.customer?.name} • <small>{o.customer?.email}</small></div>
@@ -78,9 +78,9 @@ function OrdersPage() {
                                 </div>
                             </div>
 
-                            <div style={{ marginTop: 12 }}>
+                            <div className="order-items">
                                 {o.items.map(it => (
-                                    <div key={it.productId} className="d-flex justify-content-between">
+                                    <div key={it.productId} className="item">
                                         <div style={{ color: '#fff' }}>{it.productname} x {it.qty}</div>
                                         <div style={{ color: 'var(--text-muted)' }}>₹{(it.qty * it.price).toFixed(2)}</div>
                                     </div>
@@ -92,7 +92,7 @@ function OrdersPage() {
                                 <div>Address: {o.customer?.address || 'N/A'}</div>
                             </div>
 
-                            <div className="d-flex gap-2 mt-3">
+                            <div className="d-flex gap-2 mt-3 flex-wrap">
                                 <Button size="sm" variant="outline-light" onClick={() => updateStatus(o._id, 'processing')}>Processing</Button>
                                 <Button size="sm" variant="outline-success" onClick={() => updateStatus(o._id, 'completed')}>Complete</Button>
                                 <Button size="sm" variant="outline-danger" onClick={() => setConfirmDeleteId(o._id)}>Delete</Button>

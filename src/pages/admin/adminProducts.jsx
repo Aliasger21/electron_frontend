@@ -20,6 +20,7 @@ function ProductsPage() {
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("All");
+    const [selectedBrand, setSelectedBrand] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [editProduct, setEditProduct] = useState(null);
     const [previewImage, setPreviewImage] = useState("");
@@ -61,16 +62,15 @@ function ProductsPage() {
     }, []);
 
     useEffect(() => {
-        if (selectedCategory === "All") setFilteredProducts(products);
-        else {
-            const filtered = products.filter(
-                (p) =>
-                    p.category &&
-                    p.category.toLowerCase() === selectedCategory.toLowerCase()
-            );
-            setFilteredProducts(filtered);
+        let filtered = products.slice();
+        if (selectedCategory && selectedCategory !== "All") {
+            filtered = filtered.filter(p => p.category && p.category.toLowerCase() === selectedCategory.toLowerCase());
         }
-    }, [selectedCategory, products]);
+        if (selectedBrand) {
+            filtered = filtered.filter(p => p.brand && p.brand.toLowerCase() === selectedBrand.toLowerCase());
+        }
+        setFilteredProducts(filtered);
+    }, [selectedCategory, selectedBrand, products]);
 
     const handleDelete = async () => {
         if (!deleteConfirm.id) return;
@@ -186,17 +186,30 @@ function ProductsPage() {
 
             <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <h3 className="fw-bold text-primary">📦 Manage Products</h3>
-                <Form.Select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    style={{ maxWidth: "220px" }}
-                >
-                    {categories.map((cat) => (
-                        <option key={cat} value={cat}>
-                            {cat}
-                        </option>
-                    ))}
-                </Form.Select>
+                <div className="d-flex gap-2 align-items-center">
+                    <Form.Select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        style={{ maxWidth: "220px" }}
+                    >
+                        {categories.map((cat) => (
+                            <option key={cat} value={cat}>
+                                {cat}
+                            </option>
+                        ))}
+                    </Form.Select>
+
+                    <Form.Select
+                        value={selectedBrand}
+                        onChange={(e) => setSelectedBrand(e.target.value)}
+                        style={{ maxWidth: "220px" }}
+                    >
+                        <option value="">All brands</option>
+                        {Array.from(new Set(products.map(p => (p.brand || '').toLowerCase()).filter(Boolean))).map(b => (
+                            <option key={b} value={b}>{b[0].toUpperCase() + b.slice(1)}</option>
+                        ))}
+                    </Form.Select>
+                </div>
             </div>
 
             {filteredProducts.length === 0 ? (
@@ -215,10 +228,8 @@ function ProductsPage() {
                             <Col key={p._id}>
                                 <Card
                                     className="h-100 shadow-lg border-0 rounded-4 overflow-hidden"
-                                    style={{
-                                        transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                                        minHeight: "480px",
-                                    }}
+                                    style={{ transition: "transform 0.3s ease, box-shadow 0.3s ease" }}
+                                    className="product-card h-100 shadow-lg border-0 rounded-4 overflow-hidden"
                                     onMouseEnter={(e) => {
                                         e.currentTarget.style.transform = "translateY(-8px)";
                                         e.currentTarget.style.boxShadow =
@@ -232,28 +243,8 @@ function ProductsPage() {
                                 >
                                     {/* 🖼 Updated image section */}
                                     <div className="position-relative">
-                                        <div
-                                            style={{
-                                                width: "100%",
-                                                height: "270px",
-                                                backgroundColor: "#f8f9fa",
-                                                borderBottom: "1px solid #eee",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                overflow: "hidden",
-                                            }}
-                                        >
-                                            <img
-                                                src={imageUrl}
-                                                alt={name}
-                                                style={{
-                                                    maxWidth: "100%",
-                                                    maxHeight: "100%",
-                                                    objectFit: "contain",
-                                                    borderRadius: "10px",
-                                                }}
-                                            />
+                                        <div className="product-image">
+                                            <img className="responsive-img" src={imageUrl} alt={name} style={{ borderRadius: "10px" }} />
                                         </div>
                                         <Badge
                                             bg="primary"
