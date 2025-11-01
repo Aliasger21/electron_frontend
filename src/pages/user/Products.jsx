@@ -101,8 +101,8 @@ const Products = () => {
                         <Col key={p._id}>
                             <Link to={`/products/${p._id}`} style={{ textDecoration: "none" }}>
                                 <Card style={cardStyle} className="h-100">
-                                    <div style={{ width: "100%", height: 220, backgroundColor: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", padding: 10 }}>
-                                        <img src={p.image || "https://via.placeholder.com/200"} alt={p.productname} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+                                    <div className="product-image">
+                                        <img className="responsive-img" src={p.image || "https://via.placeholder.com/200"} alt={p.productname} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
                                     </div>
                                     <Card.Body className="d-flex flex-column">
                                         <Card.Title style={{ color: "#ffffff", fontSize: "1rem", fontWeight: 600 }}>{p.productname}</Card.Title>

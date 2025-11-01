@@ -21,12 +21,14 @@ const Cart = () => {
                 <Col md={8}>
                     {cart.map((it) => (
                         <div key={it._id} className="d-flex align-items-center gap-3 mb-3 p-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12 }}>
-                            <Image src={it.image || 'https://via.placeholder.com/100'} rounded style={{ width: 100, height: 100, objectFit: 'contain', background: '#fff', padding: 8 }} />
+                            <div style={{ width: 100, maxWidth: '28vw' }}>
+                              <img src={it.image || 'https://via.placeholder.com/100'} alt={it.productname} className="responsive-img" style={{ background: '#fff', padding: 8 }} />
+                            </div>
                             <div style={{ flex: 1 }}>
                                 <div style={{ color: '#fff', fontWeight: 700 }}>{it.productname}</div>
                                 <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{it.brand || ''}</div>
                                 <div className="d-flex align-items-center gap-2 mt-2">
-                                    <input type="number" value={it.qty} min={1} onChange={(e) => { updateQty(it._id, Number(e.target.value)); toast.info('Quantity updated'); }} style={{ width: 80, padding: 6, borderRadius: 8 }} />
+                                    <input type="number" value={it.qty} min={1} onChange={(e) => { updateQty(it._id, Number(e.target.value)); toast.info('Quantity updated'); }} className="responsive-input" />
                                     <Button variant="outline-danger" size="sm" onClick={() => { removeFromCart(it._id); toast.info('Removed from cart'); }}>Remove</Button>
                                 </div>
                             </div>

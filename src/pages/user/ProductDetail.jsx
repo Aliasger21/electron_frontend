@@ -46,7 +46,7 @@ if (loading) return <Loading message="Loading product..." />;
                     <p><Badge style={{ backgroundColor: "var(--accent)" }}>{product.category}</Badge> <span style={{ color: "var(--text-muted)", marginLeft: 10 }}>{product.brand}</span></p>
 
           <div className="d-flex align-items-center gap-3 mt-4">
-            <input type="number" min={1} value={qty} onChange={(e) => setQty(Number(e.target.value))} style={{ width: 80, padding: 8, borderRadius: 8 }} />
+            <input type="number" min={1} value={qty} onChange={(e) => setQty(Number(e.target.value))} className="responsive-input" />
             <Button onClick={() => { addToCart(product, qty); toast.success('Added to cart'); }} style={{ backgroundColor: "var(--accent)", border: "none" }}>Add to Cart</Button>
                         <Link to="/cart" className="btn btn-outline-light">Go to Cart</Link>
                     </div>
