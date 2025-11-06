@@ -22,7 +22,7 @@ const Cart = () => {
                     {cart.map((it) => (
                         <div key={it._id} className="d-flex align-items-center gap-3 mb-3 p-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12 }}>
                             <div style={{ width: 100, maxWidth: '28vw' }}>
-                              <img src={it.image || 'https://via.placeholder.com/100'} alt={it.productname} className="responsive-img" style={{ background: '#fff', padding: 8 }} />
+                                <img src={it.image || 'https://via.placeholder.com/100'} alt={it.productname} className="responsive-img" style={{ background: '#fff', padding: 8 }} />
                             </div>
                             <div style={{ flex: 1 }}>
                                 <div style={{ color: '#fff', fontWeight: 700 }}>{it.productname}</div>
@@ -56,7 +56,7 @@ const Cart = () => {
                             <div style={{ color: 'var(--accent)', fontWeight: 700 }}>₹{total.toFixed(2)}</div>
                         </div>
                         <div className="d-grid gap-2 mt-3">
-                            <Button as={"a"} href="/checkout" style={{ backgroundColor: 'var(--accent)', border: 'none' }}>Proceed to Checkout</Button>
+                            <Button as={"a"} href="/checkout" className="btn-accent">Proceed to Checkout</Button>
                             <Button variant="outline-light" onClick={() => { clearCart(); toast.info('Cart cleared'); }}>Clear Cart</Button>
                         </div>
                     </div>

@@ -69,7 +69,7 @@ const Login = () => {
                             <Form.Label>Password</Form.Label>
                             <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                         </Form.Group>
-                        <Button type="submit" style={{ backgroundColor: 'var(--accent)', border: 'none' }} disabled={loading}>
+                        <Button type="submit" className="btn-accent" disabled={loading}>
                             {loading ? 'Logging in...' : 'Login'}
                         </Button>
                         <div className="mt-3" style={{ color: 'var(--text-muted)' }}>

@@ -67,8 +67,6 @@ const UploadProductPage = () => {
                 autoClose: 3000,
             });
 
-            console.log("Response:", res.data);
-
             // Reset form
             setProductname("");
             setPrice("");

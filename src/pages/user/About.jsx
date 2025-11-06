@@ -23,7 +23,7 @@ const About = () => {
           </ul>
 
           <div className="mt-3">
-            <Button as={Link} to="/products" style={{ backgroundColor: 'var(--accent)', border: 'none' }}>Browse Products</Button>
+            <Button as={Link} to="/products" className="btn-accent">Browse Products</Button>
             <Button as={Link} to="/contact" variant="outline-light" className="ms-2">Contact Us</Button>
           </div>
         </Col>

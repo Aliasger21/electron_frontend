@@ -45,7 +45,7 @@ const Contact = () => {
               <Form.Control as="textarea" rows={6} name="message" value={form.message} onChange={handleChange} required />
             </Form.Group>
             <div className="d-flex gap-2">
-              <Button type="submit" style={{ backgroundColor: 'var(--accent)', border: 'none' }}>Send Message</Button>
+              <Button type="submit" className="btn-accent">Send Message</Button>
               <Button variant="outline-light" href="mailto:support@electron.store">Email Support</Button>
             </div>
           </Form>

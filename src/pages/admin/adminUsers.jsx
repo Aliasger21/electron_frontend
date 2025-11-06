@@ -10,19 +10,17 @@ function UsersPage() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        console.log('useEffect triggered - starting API call');
         axios.get(`${BACKEND_API}/getsignup`, {
             headers: { 'Content-Type': 'application/json' },
         })
             .then(response => {
-                console.log('API Response:', response);
                 let userArray = [];
 
                 if (Array.isArray(response.data)) userArray = response.data;
                 else if (response.data?.data?.data && Array.isArray(response.data.data.data)) userArray = response.data.data.data;
                 else if (response.data?.data && Array.isArray(response.data.data)) userArray = response.data.data;
                 else if (response.data?.users && Array.isArray(response.data.users)) userArray = response.data.users;
-                else console.warn("Unexpected data structure:", response.data);
+                else console.error("Unexpected API response structure:", response.data);
 
                 setUsers(userArray);
                 setLoading(false);

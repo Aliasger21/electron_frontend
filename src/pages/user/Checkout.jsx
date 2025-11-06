@@ -26,7 +26,8 @@ const Checkout = () => {
         if (!raw) return;
         const u = JSON.parse(raw);
         const name = ((u.firstname || '') + ' ' + (u.lastname || '')).trim();
-        setCustomer(c => ({ ...c,
+        setCustomer(c => ({
+          ...c,
           name: name || c.name,
           email: u.email || c.email,
           address: u.address || c.address,
@@ -55,7 +56,7 @@ const Checkout = () => {
     }
 
     setLoading(true);
-    try { if (showLoading) showLoading('Placing your order...'); } catch {}
+    try { if (showLoading) showLoading('Placing your order...'); } catch { }
     try {
       const payload = { items: cart.map(({ _id, productname, price, qty }) => ({ productId: _id, productname, price, qty })), customer };
       const headers = { Authorization: token };
@@ -71,7 +72,7 @@ const Checkout = () => {
       } else {
         toast.error('Failed to place order');
       }
-    } finally { setLoading(false); try { if (hideLoading) hideLoading(); } catch {} }
+    } finally { setLoading(false); try { if (hideLoading) hideLoading(); } catch { } }
   };
 
   return (
@@ -96,7 +97,7 @@ const Checkout = () => {
               <Form.Label>Phone</Form.Label>
               <Form.Control name="phone" value={customer.phone} onChange={handleChange} required />
             </Form.Group>
-            <Button type="submit" disabled={loading} style={{ backgroundColor: 'var(--accent)', border: 'none' }}>
+            <Button type="submit" disabled={loading} className="btn-accent">
               {loading ? 'Placing order...' : `Pay & Place Order (₹${total.toFixed(2)})`}
             </Button>
           </Form>

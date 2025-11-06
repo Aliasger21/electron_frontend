@@ -59,7 +59,7 @@ const Register = () => {
                             <Form.Label>Password</Form.Label>
                             <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                         </Form.Group>
-                        <Button type="submit" style={{ backgroundColor: 'var(--accent)', border: 'none' }} disabled={loading}>
+                        <Button type="submit" className="btn-accent" disabled={loading}>
                             {loading ? 'Registering...' : 'Register'}
                         </Button>
                     </Form>

@@ -117,7 +117,7 @@ const Profile = () => {
               <Col md={6}><Form.Control as="textarea" rows={5} name="address" value={form.address} onChange={handleChange} placeholder="Address" /></Col>
             </Row>
             <div className="mt-3">
-              <Button type="submit" style={{ backgroundColor: 'var(--accent)', border: 'none' }}>Save Profile</Button>
+              <Button type="submit" className="btn-accent">Save Profile</Button>
               <Button variant="outline-light" className="ms-2" onClick={handleDeleteAccount}>Delete Account</Button>
             </div>
           </Form>
