@@ -7,8 +7,6 @@ const UserLayout = () => {
         <div
             style={{
                 minHeight: "100vh",
-                backgroundColor: "var(--bg-dark)",
-                color: "var(--text)",
                 display: "flex",
                 flexDirection: "column",
             }}

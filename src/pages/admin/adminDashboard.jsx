@@ -1,123 +1,58 @@
-import React, { useEffect, useState } from "react";
-import { Row, Col, Card, Table, Button, Spinner } from "react-bootstrap";
-import axios from "axios";
-import { BACKEND_API } from "../../config";
+import React from "react";
+import { Row, Col, Table } from "react-bootstrap";
+import EdCard from "../../components/ui/Card";
+import EdButton from "../../components/ui/button";
+import { Link } from 'react-router-dom';
 
 function AdminDashboard() {
-    const [loading, setLoading] = useState(true);
-    const [productsCount, setProductsCount] = useState(0);
-    const [ordersCount, setOrdersCount] = useState(0);
-    const [usersCount, setUsersCount] = useState(0);
-    const [revenue, setRevenue] = useState(0);
-    const [recentOrders, setRecentOrders] = useState([]);
-    const [topProducts, setTopProducts] = useState([]);
+    const stats = [
+        { label: "Products", value: 128 },
+        { label: "Orders", value: 54 },
+        { label: "Users", value: 24 },
+        { label: "Revenue", value: "$12.4k" },
+    ];
 
-    useEffect(() => {
-        let mounted = true;
-        async function fetchStats() {
-            setLoading(true);
-            try {
-                // products
-                const prodRes = await axios.get(`${BACKEND_API}/products`, { params: { page: 1, perPage: 1 } });
-                const totalProducts = prodRes.data && prodRes.data.total ? prodRes.data.total : (prodRes.data && prodRes.data.products ? prodRes.data.products.length : 0);
+    const recentOrders = [
+        { id: "#1008", customer: "Alice", total: "$120.00", status: "Paid" },
+        { id: "#1007", customer: "Bob", total: "$75.50", status: "Pending" },
+        { id: "#1006", customer: "Carlos", total: "$210.00", status: "Shipped" },
+        { id: "#1005", customer: "Diana", total: "$19.99", status: "Paid" },
+    ];
 
-                // users
-                const usersRes = await axios.get(`${BACKEND_API}/getsignup`);
-                const usersData = usersRes.data && usersRes.data.data && usersRes.data.data.data ? usersRes.data.data.data : (usersRes.data && usersRes.data.data ? usersRes.data.data : []);
-                const totalUsers = Array.isArray(usersData) ? usersData.length : 0;
-
-                // orders
-                const ordersRes = await axios.get(`${BACKEND_API}/orders`);
-                const orders = ordersRes.data && ordersRes.data.orders ? ordersRes.data.orders : [];
-
-                // revenue: only consider orders with status 'completed' (also treat 'paid' as completed)
-                const completedStatuses = new Set(['completed', 'paid']);
-                const revenueSum = orders.reduce((sum, o) => {
-                    const st = (o.status || '').toString().toLowerCase();
-                    if (completedStatuses.has(st)) return sum + (Number(o.total) || 0);
-                    return sum;
-                }, 0);
-
-                // recent orders (take first 6)
-                const recent = orders.slice(0, 6);
-
-                // top products by qty across orders
-                const counts = {};
-                orders.forEach((o) => {
-                    (o.items || []).forEach((it) => {
-                        const key = it.productname || (it.productId || '').toString();
-                        const qty = Number(it.qty) || 0;
-                        counts[key] = (counts[key] || 0) + qty;
-                    });
-                });
-                const top = Object.entries(counts)
-                    .map(([name, sold]) => ({ name, sold }))
-                    .sort((a, b) => b.sold - a.sold)
-                    .slice(0, 5);
-
-                if (!mounted) return;
-                setProductsCount(totalProducts || 0);
-                setUsersCount(totalUsers || 0);
-                setOrdersCount(orders.length || 0);
-                setRevenue(revenueSum || 0);
-                setRecentOrders(recent);
-                setTopProducts(top);
-            } catch (err) {
-                console.error('Failed to fetch admin stats', err);
-            } finally {
-                if (mounted) setLoading(false);
-            }
-        }
-        fetchStats();
-        return () => { mounted = false; };
-    }, []);
+    const topProducts = [
+        { name: "Wireless Headphones", sold: 124 },
+        { name: "USB-C Charger", sold: 98 },
+        { name: "Smartwatch", sold: 76 },
+    ];
 
     return (
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '20px auto', boxSizing: 'border-box' }}>
             <Row className="g-3 mb-3">
-                {loading ? (
-                    <Col xs={12} className="text-center"><Spinner animation="border" /></Col>
-                ) : (
-                    <>
-                        <Col xs={12} md={6} lg={3}>
-                            <Card className="card p-3">
-                                <div className="card-title mb-1">Products</div>
-                                <div className="h3 mb-0">{productsCount}</div>
-                            </Card>
-                        </Col>
-
-                        <Col xs={12} md={6} lg={3}>
-                            <Card className="card p-3">
-                                <div className="card-title mb-1">Orders</div>
-                                <div className="h3 mb-0">{ordersCount}</div>
-                            </Card>
-                        </Col>
-
-                        <Col xs={12} md={6} lg={3}>
-                            <Card className="card p-3">
-                                <div className="card-title mb-1">Users</div>
-                                <div className="h3 mb-0">{usersCount}</div>
-                            </Card>
-                        </Col>
-
-                        <Col xs={12} md={6} lg={3}>
-                            <Card className="card p-3">
-                                <div className="card-title mb-1">Revenue</div>
-                                <div className="h3 mb-0">${revenue.toFixed(2)}</div>
-                            </Card>
-                        </Col>
-                    </>
-                )}
+                {stats.map((s) => (
+                    <Col key={s.label} xs={12} md={6} lg={3}>
+                        <EdCard className="card p-3">
+                            <div className="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div className="card-title mb-1">{s.label}</div>
+                                    <div className="h3 mb-0">{s.value}</div>
+                                </div>
+                                <div className="text-muted">&nbsp;</div>
+                            </div>
+                        </EdCard>
+                    </Col>
+                ))}
             </Row>
 
             <Row>
                 <Col md={8} className="mb-3">
-                    <Card className="card">
-                        <Card.Header className="card-header d-flex justify-content-between align-items-center">
+                    <EdCard className="card">
+                        <div className="card-header d-flex justify-content-between align-items-center">
                             <span>Recent Orders</span>
-                            <Button variant="primary" size="sm">View all</Button>
-                        </Card.Header>
-                        <Card.Body className="card-body p-0">
+                            <Link to="/admin/orders">
+                                <EdButton>View all</EdButton>
+                            </Link>
+                        </div>
+                        <div className="card-body p-0">
                             <Table hover responsive className="mb-0">
                                 <thead>
                                     <tr>
@@ -129,37 +64,33 @@ function AdminDashboard() {
                                 </thead>
                                 <tbody>
                                     {recentOrders.map((o) => (
-                                        <tr key={o._id || o.id}>
-                                            <td>{o._id || o.id}</td>
-                                            <td>{(o.customer && (o.customer.name || o.customer.email)) || '—'}</td>
-                                            <td>${Number(o.total || 0).toFixed(2)}</td>
-                                            <td>{o.status || '—'}</td>
+                                        <tr key={o.id}>
+                                            <td>{o.id}</td>
+                                            <td>{o.customer}</td>
+                                            <td>{o.total}</td>
+                                            <td>{o.status}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </Table>
-                        </Card.Body>
-                    </Card>
+                        </div>
+                    </EdCard>
                 </Col>
 
                 <Col md={4} className="mb-3">
-                    <Card className="card">
-                        <Card.Header className="card-header">Top Products</Card.Header>
-                        <Card.Body className="card-body">
+                    <EdCard className="card">
+                        <div className="card-header card-header">Top Products</div>
+                        <div className="card-body card-body">
                             <ul className="list-unstyled mb-0">
-                                {topProducts.length === 0 ? (
-                                    <li className="py-2 text-muted">No data</li>
-                                ) : (
-                                    topProducts.map((p) => (
-                                        <li key={p.name} className="d-flex justify-content-between align-items-center py-2">
-                                            <span>{p.name}</span>
-                                            <span className="text-muted">{p.sold}</span>
-                                        </li>
-                                    ))
-                                )}
+                                {topProducts.map((p) => (
+                                    <li key={p.name} className="d-flex justify-content-between align-items-center py-2">
+                                        <span>{p.name}</span>
+                                        <span className="text-muted">{p.sold}</span>
+                                    </li>
+                                ))}
                             </ul>
-                        </Card.Body>
-                    </Card>
+                        </div>
+                    </EdCard>
                 </Col>
             </Row>
         </div>

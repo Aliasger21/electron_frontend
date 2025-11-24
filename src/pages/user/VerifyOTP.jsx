@@ -1,5 +1,6 @@
 // src/pages/user/VerifyOTP.jsx
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form } from 'react-bootstrap';
+import EdButton from '../../components/ui/button';
 import { useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
@@ -68,9 +69,9 @@ const VerifyOTP = () => {
                             <Form.Label>OTP</Form.Label>
                             <Form.Control type="text" value={otp} onChange={(e) => setOtp(e.target.value)} required />
                         </Form.Group>
-                        <Button type="submit" className="btn-accent" disabled={verifying}>
+                        <EdButton type="submit" disabled={verifying}>
                             {verifying ? 'Verifying...' : 'Verify'}
-                        </Button>
+                        </EdButton>
                     </Form>
                 </Col>
             </Row>

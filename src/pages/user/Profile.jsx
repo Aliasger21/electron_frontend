@@ -1,10 +1,15 @@
 // src/pages/user/Profile.jsx
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import ConfirmModal from '../../components/common/ConfirmModal';
+
+import EdButton from '../../components/ui/button';
+import Input from '../../components/ui/Input';
+import Card from '../../components/ui/Card';
+import Skeleton from '../../components/ui/Skeleton';
 
 const Profile = () => {
   const [user, setUser] = useState(() => {
@@ -21,7 +26,6 @@ const Profile = () => {
     (async () => {
       try {
         const res = await axiosInstance.post(`/authverify`, {}); // axiosInstance will attach token
-        // backend returns { status: true, data: { message, data: user } }
         const u = res.data?.data?.data || res.data?.data || res.data;
         if (u) {
           setUser(u);
@@ -30,7 +34,7 @@ const Profile = () => {
           setPreview(u.profilePic || '');
         }
       } catch (err) {
-        // ignore
+        // ignore silently — user may need to login
       }
     })();
   }, []);
@@ -49,7 +53,7 @@ const Profile = () => {
     if (!token) { toast.info('Please login'); navigate('/login'); return; }
     try {
       // update fields
-      const res = await axiosInstance.put(`/updatesignup/${user._id}`, form);
+      await axiosInstance.put(`/updatesignup/${user._id}`, form);
       // upload file if any
       if (file) {
         const fd = new FormData(); fd.append('file', file);
@@ -62,7 +66,8 @@ const Profile = () => {
       toast.success('Profile updated');
     } catch (err) {
       console.error(err);
-      toast.error('Failed to update profile');
+      const serverMsg = err?.response?.data?.data?.message || err?.response?.data?.message || err?.message;
+      toast.error(serverMsg || 'Failed to update profile');
     }
   };
 
@@ -121,28 +126,41 @@ const Profile = () => {
     <Container className="py-5">
       <Row>
         <Col md={4} className="text-center">
-          <div className="avatar-preview">
-            <img src={preview || 'https://via.placeholder.com/180'} alt="profile" />
-          </div>
-          <Form.Group className="mt-3">
-            <Form.Label style={{ color: 'var(--text)' }}>Change Profile Picture</Form.Label>
-            <Form.Control type="file" accept="image/*" onChange={handleFile} />
-          </Form.Group>
+          <Card className="text-center">
+            <div className="avatar-preview" style={{ marginBottom: 12 }}>
+              <img src={preview || 'https://via.placeholder.com/180'} alt="profile" style={{ width: 180, height: 180, borderRadius: 8, objectFit: 'cover' }} />
+            </div>
+            <Form.Group className="mt-3 px-2">
+              <Form.Label style={{ color: 'var(--text)' }}>Change Profile Picture</Form.Label>
+              <Form.Control type="file" accept="image/*" onChange={handleFile} />
+            </Form.Group>
+          </Card>
         </Col>
         <Col md={8}>
           <h3 style={{ color: '#fff' }}>Edit Profile</h3>
           <Form className="mt-3" onSubmit={handleSave}>
             <Row className="g-3">
-              <Col md={6}><Form.Control name="firstname" value={form.firstname} onChange={handleChange} placeholder="First name" required /></Col>
-              <Col md={6}><Form.Control name="lastname" value={form.lastname} onChange={handleChange} placeholder="Last name" required /></Col>
-              <Col md={12}><Form.Control type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email" required /></Col>
-              <Col md={6}><Form.Control name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" /></Col>
-              <Col md={6}><Form.Control as="textarea" rows={5} name="address" value={form.address} onChange={handleChange} placeholder="Address" /></Col>
+              <Col md={6}>
+                <Input name="firstname" value={form.firstname} onChange={handleChange} placeholder="First name" required />
+              </Col>
+              <Col md={6}>
+                <Input name="lastname" value={form.lastname} onChange={handleChange} placeholder="Last name" required />
+              </Col>
+              <Col md={12}>
+                <Input type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email" required />
+              </Col>
+              <Col md={6}>
+                <Input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" />
+              </Col>
+              <Col md={6}>
+                {/* keep textarea as bootstrap control for simplicity */}
+                <Form.Control as="textarea" rows={5} name="address" value={form.address} onChange={handleChange} placeholder="Address" />
+              </Col>
             </Row>
             <div className="mt-3">
-              <Button type="submit" className="btn-accent">Save Profile</Button>
-              <Button variant="outline-light" className="ms-2" onClick={handleDeleteAccount}>Delete Account</Button>
-              <Button variant="outline-light" className="ms-2" onClick={() => setShowChangePassword(!showChangePassword)}>Change Password</Button>
+              <EdButton type="submit" className="me-2">Save Profile</EdButton>
+              <Button variant="outline" className="me-2" onClick={handleDeleteAccount}>Delete Account</Button>
+              <Button variant="outline" onClick={() => setShowChangePassword(!showChangePassword)}>Change Password</Button>
             </div>
           </Form>
 
@@ -151,14 +169,14 @@ const Profile = () => {
               <h5 style={{ color: '#fff', marginTop: 20 }}>Change Password</h5>
               <Row className="g-3">
                 <Col md={6}>
-                  <Form.Control type="password" placeholder="Old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} required />
+                  <Input type="password" placeholder="Old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} required />
                 </Col>
                 <Col md={6}>
-                  <Form.Control type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                  <Input type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
                 </Col>
               </Row>
               <div className="mt-3">
-                <Button type="submit" className="btn-accent" disabled={changing}>{changing ? 'Updating...' : 'Update Password'}</Button>
+                <Button type="submit" disabled={changing}>{changing ? 'Updating...' : 'Update Password'}</Button>
               </div>
             </Form>
           )}

@@ -23,12 +23,12 @@ const ProductDetail = () => {
                 console.error(err);
             } finally {
                 setLoading(false);
-            }
+            } s
         }
         fetchProduct();
     }, [id]);
 
-if (loading) return <Loading message="Loading product..." />;
+    if (loading) return <Loading message="Loading product..." />;
     if (!product) return <Container className="py-5 text-center">Product not found.</Container>;
 
     return (
@@ -40,14 +40,14 @@ if (loading) return <Loading message="Loading product..." />;
                     </div>
                 </Col>
                 <Col md={6}>
-                    <h2 style={{ color: "#fff" }}>{product.productname}</h2>
+                    <h2>{product.productname}</h2>
                     <p style={{ color: "var(--text-muted)" }}>{product.description}</p>
                     <p><strong style={{ color: "var(--accent)" }}>₹{product.price}</strong></p>
                     <p><Badge style={{ backgroundColor: "var(--accent)" }}>{product.category}</Badge> <span style={{ color: "var(--text-muted)", marginLeft: 10 }}>{product.brand}</span></p>
 
-          <div className="d-flex align-items-center gap-3 mt-4">
-            <input type="number" min={1} value={qty} onChange={(e) => setQty(Number(e.target.value))} className="responsive-input" />
-            <Button onClick={() => { addToCart(product, qty); toast.success('Added to cart'); }} style={{ backgroundColor: "var(--accent)", border: "none" }}>Add to Cart</Button>
+                    <div className="d-flex align-items-center gap-3 mt-4">
+                        <input type="number" min={1} value={qty} onChange={(e) => setQty(Number(e.target.value))} className="responsive-input" />
+                        <Button onClick={() => { addToCart(product, qty); toast.success('Added to cart'); }} style={{ backgroundColor: "var(--accent)", border: "none" }}>Add to Cart</Button>
                         <Link to="/cart" className="btn btn-outline-light">Go to Cart</Link>
                     </div>
                 </Col>

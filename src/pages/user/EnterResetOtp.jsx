@@ -1,35 +1,57 @@
 // src/pages/user/EnterResetOtp.jsx
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
-import { useState } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
-import { toast } from 'react-toastify';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Container, Row, Col } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import axiosInstance from "../../utils/axiosInstance";
+import { toast } from "react-toastify";
+import { useLocation, useNavigate } from "react-router-dom";
+import EdButton from "../../components/ui/button";
+import Input from "../../components/ui/Input";
+import Card from "../../components/ui/Card";
 
 const EnterResetOtp = () => {
-    const [otp, setOtp] = useState('');
-    const [email, setEmail] = useState('');
+    const [otp, setOtp] = useState("");
+    const [email, setEmail] = useState("");
     const [verifying, setVerifying] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
-    // email might be passed via state from ForgotPassword
-    useState(() => {
-        if (location.state && location.state.email) setEmail(location.state.email);
-    });
+    useEffect(() => {
+        if (location?.state?.email) setEmail(location.state.email);
+    }, [location]);
 
     const submit = async (e) => {
         e.preventDefault();
         if (verifying) return;
-        if (!email) { toast.info('Please enter your email'); return; }
+        if (!email) {
+            toast.info("Please enter your email");
+            return;
+        }
+        if (!otp) {
+            toast.info("Please enter the OTP");
+            return;
+        }
+
         setVerifying(true);
         try {
-            // We don't have a dedicated "verify reset OTP" endpoint on backend,
-            // but resetPassword endpoint will validate OTP when changing password.
-            // Here we just move to NewPassword with email and otp.
-            navigate('/reset-password', { state: { email, otp } });
+            // Optional: verify OTP quickly via backend if you have endpoint.
+            // If not, just navigate to NewPassword with email+otp and validate there.
+            // We'll attempt a lightweight verify endpoint if available, otherwise skip.
+            try {
+                await axiosInstance.post("/verify-reset-otp", { email, otp });
+                // if successful proceed to reset password page
+                navigate("/reset-password", { state: { email, otp } });
+            } catch (err) {
+                // if endpoint doesn't exist or returns 404, still navigate to reset page
+                if (err?.response?.status === 404 || err?.response?.status === 405) {
+                    navigate("/reset-password", { state: { email, otp } });
+                } else {
+                    const msg = err?.response?.data?.data?.message || err?.response?.data?.message || err?.message;
+                    toast.error(msg || "OTP verification failed");
+                }
+            }
         } catch (err) {
             console.error(err);
-            toast.error('Failed to verify OTP');
+            toast.error("Failed to verify OTP");
         } finally {
             setVerifying(false);
         }
@@ -39,20 +61,27 @@ const EnterResetOtp = () => {
         <Container className="py-5">
             <Row className="justify-content-center">
                 <Col md={6}>
-                    <h3 style={{ color: '#fff' }}>Enter Reset OTP</h3>
-                    <Form onSubmit={submit} className="mt-3">
-                        <Form.Group className="mb-3">
-                            <Form.Label>Email</Form.Label>
-                            <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>OTP</Form.Label>
-                            <Form.Control type="text" value={otp} onChange={(e) => setOtp(e.target.value)} required />
-                        </Form.Group>
-                        <Button type="submit" className="btn-accent" disabled={verifying}>
-                            {verifying ? 'Proceeding...' : 'Proceed to reset password'}
-                        </Button>
-                    </Form>
+                    <Card>
+                        <h3 style={{ color: "#fff" }}>Enter Reset OTP</h3>
+                        <form onSubmit={submit} className="mt-3">
+                            <div className="mb-3">
+                                <label style={{ color: "var(--text-muted)" }}>Email</label>
+                                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                            </div>
+
+                            <div className="mb-3">
+                                <label style={{ color: "var(--text-muted)" }}>OTP</label>
+                                <Input type="text" value={otp} onChange={(e) => setOtp(e.target.value)} required />
+                            </div>
+
+                            <div className="d-flex gap-2">
+                                <EdButton type="submit" disabled={verifying}>
+                                    {verifying ? "Proceeding..." : "Proceed to reset password"}
+                                </EdButton>
+                                <EdButton variant="outline" onClick={() => navigate("/forgot-password")}>Back</EdButton>
+                            </div>
+                        </form>
+                    </Card>
                 </Col>
             </Row>
         </Container>

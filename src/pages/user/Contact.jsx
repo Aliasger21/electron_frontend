@@ -1,54 +1,78 @@
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+// src/pages/user/Contact.jsx
+import { Container, Row, Col } from 'react-bootstrap';
 import { useState } from 'react';
-import axios from 'axios';
-import { BACKEND_API } from '../../config';
+import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
 import { useLoading } from '../../context/LoadingContext';
+import EdButton from '../../components/ui/button';
+import Input from '../../components/ui/Input';
+import Card from '../../components/ui/Card';
 
 const Contact = () => {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const { showLoading, hideLoading } = useLoading();
 
-  const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+  const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) return toast.error('All fields are required');
     try {
-      showLoading('Sending message...');
-      await axios.post(`${BACKEND_API}/contact`, form);
+      if (showLoading) showLoading('Sending message...');
+      await axiosInstance.post('/contact', form);
       toast.success('Message sent — we will contact you shortly');
       setForm({ name: '', email: '', message: '' });
     } catch (err) {
       console.error(err);
-      toast.error('Failed to send message');
-    } finally { hideLoading(); }
+      const msg = err?.response?.data?.data?.message || err?.response?.data?.message || err?.message;
+      toast.error(msg || 'Failed to send message');
+    } finally {
+      try { if (hideLoading) hideLoading(); } catch { }
+    }
   };
 
   return (
     <Container className="py-5">
       <Row className="justify-content-center">
         <Col md={8}>
-          <h2 style={{ color: '#fff' }}>Contact Us</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Have questions or need help? Send us a message and our support team will get back to you.</p>
-          <Form onSubmit={handleSubmit} className="mt-3">
-            <Form.Group className="mb-3">
-              <Form.Label>Name</Form.Label>
-              <Form.Control name="name" value={form.name} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control type="email" name="email" value={form.email} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Message</Form.Label>
-              <Form.Control as="textarea" rows={6} name="message" value={form.message} onChange={handleChange} required />
-            </Form.Group>
-            <div className="d-flex gap-2">
-              <Button type="submit" className="btn-accent">Send Message</Button>
-              <Button variant="outline-light" href="mailto:support@electron.store">Email Support</Button>
-            </div>
-          </Form>
+          <Card>
+            <h2>Contact Us</h2>
+            <p style={{ color: 'var(--text-muted)' }}>
+              Have questions or need help? Send us a message and our support team will get back to you.
+            </p>
+
+            <form onSubmit={handleSubmit} className="mt-3">
+              <div className="mb-3">
+                <label style={{ color: 'var(--text-muted)' }}>Name</label>
+                <Input name="name" value={form.name} onChange={handleChange} required />
+              </div>
+
+              <div className="mb-3">
+                <label style={{ color: 'var(--text-muted)' }}>Email</label>
+                <Input type="email" name="email" value={form.email} onChange={handleChange} required />
+              </div>
+
+              <div className="mb-3">
+                <label style={{ color: 'var(--text-muted)' }}>Message</label>
+                <textarea
+                  name="message"
+                  rows={6}
+                  value={form.message}
+                  onChange={handleChange}
+                  className="ed-input"
+                  style={{ resize: 'vertical' }}
+                  required
+                />
+              </div>
+
+              <div className="d-flex gap-2">
+                <EdButton type="submit">Send Message</EdButton>
+                <a href="mailto:support@electron.store">
+                  <EdButton variant="outline">Email Support</EdButton>
+                </a>
+              </div>
+            </form>
+          </Card>
         </Col>
       </Row>
     </Container>
@@ -56,5 +80,3 @@ const Contact = () => {
 };
 
 export default Contact;
-
-

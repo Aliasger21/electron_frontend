@@ -9,7 +9,9 @@ const VerifySuccess = () => {
         <p style={{ color: 'var(--text-muted)' }}>Thank you — your email has been successfully verified. You can now log in and start shopping.</p>
         <div className="d-flex justify-content-center gap-2">
           <Button as={Link} to="/login" variant="light">Log in</Button>
-          <Button as={Link} to="/" className="btn-accent">Continue Shopping</Button>
+          <Link to="/">
+            <EdButton>Continue Shopping</EdButton>
+          </Link>
         </div>
       </div>
     </Container>

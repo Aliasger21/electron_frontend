@@ -1,10 +1,15 @@
 // src/pages/user/Register.jsx
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form } from 'react-bootstrap';
+import EdButton from '../../components/ui/button';
 import { useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
-import { BACKEND_API } from '../../config';
+import { DEFAULT_AVATAR_URL } from '../../config';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+
+import Input from '../../components/ui/Input';
+import Card from '../../components/ui/Card';
+import Skeleton from '../../components/ui/Skeleton';
 
 const Register = () => {
     const [firstname, setFirstname] = useState('');
@@ -20,27 +25,20 @@ const Register = () => {
         if (loading) return;
         setLoading(true);
 
-        // Save pre-register creds so VerifyOTP can auto-login after verification.
-        // This is removed by VerifyOTP after successful auto-login.
         try {
             localStorage.setItem('preRegisterCreds', JSON.stringify({ email, password }));
         } catch (err) {
-            // ignore storage errors
             console.warn('Failed to save preRegisterCreds', err);
         }
 
         try {
-            // use axiosInstance which has BACKEND_API as baseURL and auto-attaches token if present
-            const res = await axiosInstance.post(`/signup`, { firstname, lastname, email, password });
-            // success: backend will send OTP email now
+            // Provide a default profile picture unless the user uploads one later
+            await axiosInstance.post(`/signup`, { firstname, lastname, email, password, profilePic: DEFAULT_AVATAR_URL });
             toast.success('Verification OTP sent — please check your email');
-            // navigate to verify page where user will enter OTP
             navigate('/verify');
         } catch (err) {
             console.error(err);
-            // clean up preRegisterCreds on error so we don't try auto-login for failed attempts
             try { localStorage.removeItem('preRegisterCreds'); } catch { }
-
             const status = err?.response?.status;
             const msg = err?.response?.data?.data?.message || err?.response?.data?.message || err?.message;
             if (status === 409) {
@@ -58,28 +56,30 @@ const Register = () => {
         <Container className="py-5">
             <Row className="justify-content-center">
                 <Col md={6}>
-                    <h3 style={{ color: '#fff' }}>Register</h3>
-                    <Form onSubmit={submit} className="mt-3">
-                        <Form.Group className="mb-3">
-                            <Form.Label>First Name</Form.Label>
-                            <Form.Control value={firstname} onChange={(e) => setFirstname(e.target.value)} required />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Last Name</Form.Label>
-                            <Form.Control value={lastname} onChange={(e) => setLastname(e.target.value)} required />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Email</Form.Label>
-                            <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Password</Form.Label>
-                            <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                        </Form.Group>
-                        <Button type="submit" className="btn-accent" disabled={loading}>
-                            {loading ? 'Registering...' : 'Register'}
-                        </Button>
-                    </Form>
+                    <Card>
+                        <h3 style={{ color: '#fff' }}>Register</h3>
+                        <Form onSubmit={submit} className="mt-3">
+                            <Form.Group className="mb-3">
+                                <Form.Label>First Name</Form.Label>
+                                <Input value={firstname} onChange={(e) => setFirstname(e.target.value)} required />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Last Name</Form.Label>
+                                <Input value={lastname} onChange={(e) => setLastname(e.target.value)} required />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Email</Form.Label>
+                                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Password</Form.Label>
+                                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                            </Form.Group>
+                            <div>
+                                <EdButton type="submit" disabled={loading}>{loading ? 'Registering...' : 'Register'}</EdButton>
+                            </div>
+                        </Form>
+                    </Card>
                 </Col>
             </Row>
         </Container>

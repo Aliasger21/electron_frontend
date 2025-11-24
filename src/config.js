@@ -14,6 +14,8 @@ if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VIT
 
 export const BACKEND_BASE = backendBase;
 export const BACKEND_API = `${backendBase}/.netlify/functions/index`;
+// Default avatar used for new users who don't upload a profile picture.
+export const DEFAULT_AVATAR_URL = '/default-avatar.svg';
 
 // helpful runtime debug log (removed in future if noisy)
 if (typeof window !== 'undefined') console.debug('[CONFIG] BACKEND_API =', BACKEND_API);

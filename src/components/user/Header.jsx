@@ -2,6 +2,7 @@ import { Navbar, Nav, Container, Badge, NavDropdown, Image, Button } from "react
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useEffect, useState } from "react";
+import { DEFAULT_AVATAR_URL } from '../../config';
 
 const Header = () => {
     const { cart } = useCart();
@@ -42,7 +43,7 @@ const Header = () => {
                     className="fw-bold fs-4"
                     style={{ color: "var(--accent)" }}
                 >
-                    Electron<span style={{ color: "var(--text)" }}>.store</span>
+                    Electron<span>.store</span>
                 </Navbar.Brand>
 
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -64,9 +65,9 @@ const Header = () => {
                                 <div className="cart-dropdown-panel">
                                     {cart.slice(0, 5).map((it) => (
                                         <NavDropdown.ItemText key={it._id} className="d-flex align-items-center gap-2">
-                                            <img src={it.image || 'https://via.placeholder.com/50'} alt={it.productname} className="avatar-xs" />
+                                            <img src={it.image || DEFAULT_AVATAR_URL} alt={it.productname} className="avatar-xs" />
                                             <div style={{ flex: 1 }}>
-                                                <div style={{ color: '#fff', fontSize: '0.9rem' }}>{it.productname}</div>
+                                                <div style={{ color: 'var(--text)' }}>{it.productname}</div>
                                                 <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Qty: {it.qty}</div>
                                             </div>
                                             <div style={{ color: 'var(--accent)' }}>₹{(it.price * it.qty).toFixed(0)}</div>
@@ -88,8 +89,8 @@ const Header = () => {
                                     align="end"
                                     title={
                                         <span className="d-flex align-items-center gap-2">
-                                            <img src={user.profilePic || 'https://via.placeholder.com/40'} alt="user" className="avatar-xxs" />
-                                            <span style={{ color: '#fff', fontWeight: 600 }}>{user.firstname || user.email}</span>
+                                            <img src={user.profilePic || DEFAULT_AVATAR_URL} alt="user" className="avatar-xxs" />
+                                            <span style={{ color: 'var(--text)', fontWeight: 600 }}>{user.firstname || user.email}</span>
                                         </span>
                                     }
                                 >

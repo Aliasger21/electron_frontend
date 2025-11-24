@@ -105,7 +105,7 @@ const Products = () => {
                                         <img className="responsive-img" src={p.image || "https://via.placeholder.com/200"} alt={p.productname} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
                                     </div>
                                     <Card.Body className="d-flex flex-column">
-                                        <Card.Title style={{ color: "#ffffff", fontSize: "1rem", fontWeight: 600 }}>{p.productname}</Card.Title>
+                                        <Card.Title style={{ color: "var(--text)", fontSize: "1rem", fontWeight: 600 }}>{p.productname}</Card.Title>
                                         <Card.Text style={{ color: "var(--text-muted)", flex: 1 }}>{p.description}</Card.Text>
                                         <div className="d-flex justify-content-between align-items-center mt-auto">
                                             <h5 style={{ color: "var(--accent)", fontWeight: 700 }}>Rs {p.price}</h5>
@@ -147,7 +147,7 @@ const Products = () => {
         <Container className="py-5">
             <Row className="align-items-center mb-4">
                 <Col md={6} className="mb-2">
-                    <h2 style={{ color: "#ffffff" }}>Products</h2>
+                    <h2>Products</h2>
                 </Col>
                 <Col md={6}>
                     <div className="filters d-flex gap-2 justify-content-md-end align-items-center flex-wrap">

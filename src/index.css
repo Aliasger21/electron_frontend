@@ -2,10 +2,11 @@
 /* Keep consistent box-sizing globally but do not reset margins/padding */
 * { box-sizing: border-box; }
 
-body {
+html, body {
+  font-family: 'Poppins', sans-serif !important;
+  background-color: var(--bg-dark);
+  color: var(--text);
   margin: 0;
-  font-family: 'Inter', sans-serif;
-  background-color: #f8f9fa;
   overflow-y: scroll; /* always reserve vertical scrollbar */
 }
 
