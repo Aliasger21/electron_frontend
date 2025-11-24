@@ -25,7 +25,7 @@ const Footer = () => {
                 <Row className="mb-4 pb-4" style={{ borderBottom: "1px solid var(--border)" }}>
                     <Col md={12}>
                         <div className="text-center">
-                            <h5 style={{ marginBottom: "10px", fontWeight: "600" }}>
+                            <h5 style={{ color: "#ffffff", marginBottom: "10px", fontWeight: "600" }}>
                                 📧 Subscribe to Our Newsletter
                             </h5>
                             <p style={{ color: "var(--text-muted)", marginBottom: "20px", fontSize: "0.9rem" }}>
@@ -70,7 +70,7 @@ const Footer = () => {
                 {/* Footer Links & Info */}
                 <Row className="justify-content-center">
                     <Col xs={12} sm={6} md={4} lg={3} className="mb-4 mb-md-4 mb-lg-0 text-center">
-                        <h6 style={{ marginBottom: "15px", fontWeight: "600" }}>
+                        <h6 style={{ color: "#ffffff", marginBottom: "15px", fontWeight: "600" }}>
                             Quick Links
                         </h6>
                         <div 
@@ -92,7 +92,7 @@ const Footer = () => {
                         </div>
                     </Col>
                     <Col xs={12} sm={6} md={4} lg={3} className="mb-4 mb-md-4 mb-lg-0 text-center">
-                        <h6 style={{ marginBottom: "15px", fontWeight: "600" }}>
+                        <h6 style={{ color: "#ffffff", marginBottom: "15px", fontWeight: "600" }}>
                             Customer Service
                         </h6>
                         <div 
@@ -114,7 +114,7 @@ const Footer = () => {
                         </div>
                     </Col>
                     <Col xs={12} sm={6} md={4} lg={3} className="text-center">
-                        <h6 style={{ marginBottom: "15px", fontWeight: "600" }}>
+                        <h6 style={{ color: "#ffffff", marginBottom: "15px", fontWeight: "600" }}>
                             Contact Us
                         </h6>
                         <div 
@@ -142,7 +142,7 @@ const Footer = () => {
                             <span style={{ color: "var(--accent)", fontWeight: "600" }}>
                                 Electron
                             </span>
-                            <span style={{ fontWeight: "600" }}>
+                            <span style={{ color: "#ffffff", fontWeight: "600" }}>
                                 .store
                             </span>
                             . All rights reserved.

@@ -40,7 +40,7 @@ const ProductDetail = () => {
                     </div>
                 </Col>
                 <Col md={6}>
-                    <h2>{product.productname}</h2>
+                    <h2 style={{ color: "#fff" }}>{product.productname}</h2>
                     <p style={{ color: "var(--text-muted)" }}>{product.description}</p>
                     <p><strong style={{ color: "var(--accent)" }}>₹{product.price}</strong></p>
                     <p><Badge style={{ backgroundColor: "var(--accent)" }}>{product.category}</Badge> <span style={{ color: "var(--text-muted)", marginLeft: 10 }}>{product.brand}</span></p>

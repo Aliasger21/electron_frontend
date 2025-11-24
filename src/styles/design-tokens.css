@@ -1,6 +1,6 @@
-/* DESIGN TOKENS - use this file for all theme/color/spacing variables. Now supports theme switching! */
+/* DESIGN TOKENS - use only this file for theme/color/spacing variables for the whole app */
 :root {
-  /* Default: dark theme */
+  /* Color palette */
   --primary: #0d6efd;
   --accent: #00b4d8;
   --bg-dark: #0a0a0a;
@@ -10,49 +10,20 @@
   --success: #38b000;
   --error: #ff3b30;
   --border: #1f1f1f;
-  --button-on-accent: #fff;
+
   /* Spacing */
   --space-1: 8px;
   --space-2: 16px;
   --space-3: 24px;
+  
   /* Border radius */
   --radius: 12px;
+
   /* Shadows */
   --shadow-xs: 0 1px 4px rgba(0,0,0,0.13);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
   --shadow-lg: 0 8px 25px rgba(0,180,216,0.18);
 }
-
-/* LIGHT THEME VARIANTS (improved for clarity and polish) */
-[data-theme='light'] {
-  /* -------- Structure -------- */
-  --bg-dark: #f6f8fa;      /* main app/page background */
-  --bg-card: #ffffff;       /* card surface and containers */
-  --border: #d5dbe2;    /* Stronger, visible border in light mode */
-
-  /* -------- Text -------- */
-  --text: #141a21;          /* primary body text */
-  --text-muted: #727b8a;    /* paragraphs, secondary UI text */
-  --button-on-accent: #141a21;
-
-  /* -------- Brand Colors -------- */
-  --accent: #ffb300;        /* gold for CTAs, accents, badge */
-  --primary: #2563eb;       /* strong blue for buttons, highlights */
-  --success: #22a745;       /* system green */
-  --error: #d7263d;         /* system red */
-
-  /* -------- Shadow Elevation -------- */
-  --shadow-xs: 0 1px 4px rgba(24,34,52,0.08);
-  --shadow-md: 0 2px 8px rgba(24,34,52,0.10); /* moderate card, nav, pop-over */
-  --shadow-lg: 0 8px 30px rgba(24,34,52,0.14); /* high elevation overlays, modals */
-}
-
-/*
-  To toggle theme: on a root element (usually <body>),
-  use document.body.setAttribute('data-theme', 'light') or 'dark' (or remove for dark as default).
-  All UI colors will automatically update using above variables.
-  This pattern is a11y-friendly and compatible with prefers-color-scheme media queries if desired.
-*/
 
 /* Button utility classes (can remain here for now) */
 .ed-btn {
@@ -79,19 +50,18 @@
 .ed-input--error{ border-color: #e11d48; }
 .ed-input-error{ color: #fca5a5; margin-top: 6px; font-size: 0.9rem; }
 
-/* Cards - always have border and shadow for elevation, visible in light/dark */
-.ed-card {
-  border: 1px solid var(--border);
+/* Card */
+.ed-card{
   background: var(--bg-card);
-  box-shadow: var(--shadow-md);
+  padding: var(--space-2);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
 }
 
 /* Utility spacing + helpers */
 .container-page{ padding: var(--space-3); }
 h2, h3 { color: var(--text); }
 .text-muted{ color: var(--text-muted); }
-.text-on-accent { color: var(--button-on-accent) !important; }
 
 /* Card hover */
 .ed-card:hover {

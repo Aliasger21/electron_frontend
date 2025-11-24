@@ -36,7 +36,7 @@ const Contact = () => {
       <Row className="justify-content-center">
         <Col md={8}>
           <Card>
-            <h2>Contact Us</h2>
+            <h2 style={{ color: '#fff' }}>Contact Us</h2>
             <p style={{ color: 'var(--text-muted)' }}>
               Have questions or need help? Send us a message and our support team will get back to you.
             </p>

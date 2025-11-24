@@ -34,7 +34,7 @@ const MyOrders = () => {
 
   return (
     <Container className="py-5">
-      <h3>My Orders</h3>
+      <h3 style={{ color: '#fff' }}>My Orders</h3>
             {loading ? <Loading message="Loading your orders..." /> : orders.length === 0 ? <p style={{ color: 'var(--text-muted)' }}>No orders yet</p> : (
         <Row className="g-3">
           {orders.map(o => (
@@ -42,7 +42,7 @@ const MyOrders = () => {
               <div className="order-card">
                 <div className="order-top">
                   <div>
-                    <div style={{ fontWeight: 700 }}>Order #{o._id}</div>
+                    <div style={{ color: '#fff', fontWeight: 700 }}>Order #{o._id}</div>
                     <div style={{ color: 'var(--text-muted)' }}>{new Date(o.createdAt).toLocaleString()}</div>
                   </div>
                   <Badge className="order-status" bg={o.status === 'completed' ? 'success' : o.status === 'cancelled' ? 'secondary' : 'warning'}>{o.status}</Badge>
@@ -50,7 +50,7 @@ const MyOrders = () => {
                 <div style={{ marginTop: 12 }}>
                   {o.items.map(it => (
                     <div key={it.productId} className="d-flex justify-content-between">
-                      <div>{it.productname} x {it.qty}</div>
+                      <div style={{ color: '#fff' }}>{it.productname} x {it.qty}</div>
                       <div style={{ color: 'var(--text-muted)' }}>₹{(it.qty * it.price).toFixed(2)}</div>
                     </div>
                   ))}

@@ -95,8 +95,8 @@ const Home = () => {
             {/* Hero Section */}
             <Row className="align-items-center text-center mb-5">
                 <Col md={12} className="my-4">
-                    <h1 className="fw-bold display-5 mb-3">
-                        Welcome to <span className="text-primary" style={{ color: 'var(--accent)' }}>Electron</span>.store
+                    <h1 className="fw-bold display-5 mb-3 text-white">
+                        Welcome to <span className="text-primary" style={{ color: 'var(--accent)' }}>Electron</span><span className="text-white">.store</span>
                     </h1>
                     <p className="mb-4 fs-5 text-muted">
                         Your one-stop shop for mobiles, earphones, smartwatches, and all electronic accessories — at unbeatable prices.
@@ -131,7 +131,7 @@ const Home = () => {
             {/* Product Categories Grid */}
             <Row className="mb-5">
                 <Col md={12} className="mb-4">
-                    <h2 className="fw-bold mb-4 text-center">
+                    <h2 className="fw-bold mb-4 text-white text-center">
                         Shop by Category
                     </h2>
                 </Col>
@@ -142,7 +142,7 @@ const Home = () => {
                                 <div style={{ fontSize: "3rem", marginBottom: "10px" }}>
                                     {category.icon}
                                 </div>
-                                <h6 className="mb-0">{category.name}</h6>
+                                <h6 className="text-white mb-0">{category.name}</h6>
                             </div>
                         </Link>
                     </Col>
@@ -153,7 +153,7 @@ const Home = () => {
             <Row className="mb-5">
                 <Col md={12} className="mb-4">
                     <div className="d-flex justify-content-between align-items-center flex-wrap">
-                        <h2 className="fw-bold mb-0 text-center">Featured Products</h2>
+                        <h2 className="fw-bold mb-0 text-white">Featured Products</h2>
                         <EdButton variant="outline" className="px-3 py-1" as={Link} to="/products" style={{ borderRadius: "8px" }}>
                             View All →
                         </EdButton>
@@ -200,7 +200,7 @@ const Home = () => {
             {/* Why Choose Us */}
             <Row className="mb-5">
                 <Col md={12} className="mb-4">
-                    <h2 className="fw-bold mb-4 text-center">Why Choose Us?</h2>
+                    <h2 className="fw-bold mb-4 text-white text-center">Why Choose Us?</h2>
                 </Col>
                 {stats.map((stat, idx) => (
                     <Col xs={6} md={3} className="mb-4" key={idx}>
@@ -215,7 +215,7 @@ const Home = () => {
             {/* Our Benefits */}
             <Row className="mb-5">
                 <Col md={12} className="mb-4">
-                    <h2 className="fw-bold mb-4 text-center">Our Benefits</h2>
+                    <h2 className="fw-bold mb-4 text-white text-center">Our Benefits</h2>
                 </Col>
                 {benefits.map((benefit, idx) => (
                     <Col xs={12} sm={6} md={3} className="mb-4 d-flex" key={idx}>
@@ -231,7 +231,7 @@ const Home = () => {
             {/* Testimonials */}
             <Row className="mb-5">
                 <Col md={12} className="mb-4">
-                    <h2 className="fw-bold mb-4 text-center">What Our Customers Say</h2>
+                    <h2 className="fw-bold mb-4 text-white text-center">What Our Customers Say</h2>
                 </Col>
                 {testimonials.map((testimonial, idx) => (
                     <Col xs={12} sm={6} md={3} className="mb-4" key={idx}>

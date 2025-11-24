@@ -9,9 +9,9 @@ const About = () => {
     <Container className="py-5">
       <Row className="align-items-start mb-5">
         <Col md={7} className="mb-4">
-          <h1>
+          <h1 className="text-white fw-bold">
             About <span style={{ color: 'var(--accent)' }}>Electron</span>
-            <span>.store</span>
+            <span style={{ color: '#ffffff' }}>.store</span>
           </h1>
 
           <p className="text-muted">
@@ -20,7 +20,7 @@ const About = () => {
             product selection, transparent pricing and a seamless shopping experience.
           </p>
 
-          <h5>What we offer</h5>
+          <h5 className="text-white">What we offer</h5>
           <ul className="text-muted">
             <li>Curated electronics from trusted brands</li>
             <li>Secure checkout & simple returns</li>
@@ -39,13 +39,13 @@ const About = () => {
 
         <Col md={5} className="mb-4">
           <EdCard>
-            <h5>Our Mission</h5>
+            <h5 className="text-white">Our Mission</h5>
             <p className="text-muted">
               To make reliable electronics accessible to everyone while offering an
               enjoyable and simple shopping experience.
             </p>
 
-            <h5>Our Values</h5>
+            <h5 className="text-white">Our Values</h5>
             <p className="text-muted">
               Transparency, authenticity, and customer-first service. Every decision is
               based on providing the best value to our customers.
@@ -57,7 +57,7 @@ const About = () => {
       <Row className="mb-5">
         <Col md={4} className="mb-3">
           <EdCard>
-            <h4>How we source products</h4>
+            <h4 className="text-white">How we source products</h4>
             <p className="text-muted">
               We partner directly with verified brands and authorized distributors to
               ensure authenticity and warranty support.
@@ -67,7 +67,7 @@ const About = () => {
 
         <Col md={4} className="mb-3">
           <EdCard>
-            <h4>Support</h4>
+            <h4 className="text-white">Support</h4>
             <p className="text-muted">
               Our support team is available through the{' '}
               <Link to="/contact">Contact page</Link>.
@@ -77,7 +77,7 @@ const About = () => {
 
         <Col md={4} className="mb-3">
           <EdCard>
-            <h4>Careers</h4>
+            <h4 className="text-white">Careers</h4>
             <p className="text-muted">
               We're expanding! Visit the <Link to="/contact">Contact page</Link> to reach
               out for opportunities.
