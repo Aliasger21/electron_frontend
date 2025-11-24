@@ -1,18 +1,47 @@
-import React from "react";
-import { Outlet, NavLink, useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import AdminHeader from "../components/admin/adminHeader";
 import AdminSidebar from "../components/admin/adminSidebar";
-import "./admin.css"; // ensure your theme file is imported (path as needed)
+import "./admin.css";
 
+// =========================
+// 🔒 ADMIN PROTECTION ADDED
+// =========================
 export default function AdminLayout() {
+    const navigate = useNavigate();
     const location = useLocation();
+
+    useEffect(() => {
+        const rawUser = localStorage.getItem("user");
+        const token = localStorage.getItem("token");
+
+        if (!rawUser || !token) {
+            navigate("/"); // not logged in at all
+            return;
+        }
+
+        let userObj;
+        try {
+            userObj = JSON.parse(rawUser);
+        } catch {
+            navigate("/");
+            return;
+        }
+
+        if (userObj.role !== "admin") {
+            navigate("/"); // logged in but not admin
+        }
+    }, [navigate]);
 
     const getPageTitle = () => {
         const path = location.pathname.split("/").filter(Boolean);
         if (path.length === 1) return "Dashboard";
-        return path[path.length - 1].replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+        return path[path.length - 1]
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (c) => c.toUpperCase());
     };
 
+    // FULL ORIGINAL LAYOUT BELOW — UNTOUCHED
     return (
         <>
             <AdminHeader />

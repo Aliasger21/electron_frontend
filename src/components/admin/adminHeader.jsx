@@ -6,6 +6,19 @@ export default function AdminHeader() {
     const [show, setShow] = useState(false);
     const location = useLocation();
 
+    // 🔒 CHECK ADMIN ROLE
+    let isAdmin = false;
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+        try {
+            const userObj = JSON.parse(storedUser);
+            isAdmin = userObj.role === "admin";
+        } catch {
+            isAdmin = false;
+        }
+    }
+
+    // YOUR ORIGINAL ADMIN NAV ITEMS
     const navItems = [
         { path: "/admin", label: "Dashboard" },
         { path: "/admin/products", label: "Products" },
@@ -62,7 +75,8 @@ export default function AdminHeader() {
                 </Offcanvas.Header>
 
                 <Offcanvas.Body className="offcanvas-body">
-                    {navItems.map((it) => (
+                    {/* 🔒 SHOW NAV ITEMS ONLY FOR ADMINS */}
+                    {isAdmin && navItems.map((it) => (
                         <Link
                             key={it.path}
                             to={it.path}
@@ -72,6 +86,17 @@ export default function AdminHeader() {
                             {it.label}
                         </Link>
                     ))}
+
+                    {/* Non-admins can still logout (UI restriction only; backend blocks admin routes anyway) */}
+                    {!isAdmin && (
+                        <Link
+                            to="/admin/logout"
+                            className="nav-link"
+                            onClick={() => setShow(false)}
+                        >
+                            Logout
+                        </Link>
+                    )}
                 </Offcanvas.Body>
             </Offcanvas>
         </>

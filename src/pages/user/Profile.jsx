@@ -1,7 +1,7 @@
-import { Container, Row, Col, Form, Button, Image } from 'react-bootstrap';
+// src/pages/user/Profile.jsx
+import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { BACKEND_API } from '../../config';
+import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import ConfirmModal from '../../components/common/ConfirmModal';
@@ -20,7 +20,7 @@ const Profile = () => {
     if (!token) return;
     (async () => {
       try {
-        const res = await axios.post(`${BACKEND_API}/authverify`, {}, { headers: { Authorization: token } });
+        const res = await axiosInstance.post(`/authverify`, {}); // axiosInstance will attach token
         // backend returns { status: true, data: { message, data: user } }
         const u = res.data?.data?.data || res.data?.data || res.data;
         if (u) {
@@ -49,11 +49,11 @@ const Profile = () => {
     if (!token) { toast.info('Please login'); navigate('/login'); return; }
     try {
       // update fields
-      const res = await axios.put(`${BACKEND_API}/updatesignup/${user._id}`, form, { headers: { Authorization: token } });
+      const res = await axiosInstance.put(`/updatesignup/${user._id}`, form);
       // upload file if any
       if (file) {
         const fd = new FormData(); fd.append('file', file);
-        const r2 = await axios.post(`${BACKEND_API}/updatesignup/${user._id}/photo`, fd, { headers: { Authorization: token, 'Content-Type': 'multipart/form-data' } });
+        const r2 = await axiosInstance.post(`/updatesignup/${user._id}/photo`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
         form.profilePic = r2.data.data.profilePic;
       }
       const updatedUser = { ...user, ...form };
@@ -73,10 +73,8 @@ const Profile = () => {
   };
 
   const confirmDeleteAccount = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) { toast.info('Please login'); navigate('/login'); return; }
     try {
-      await axios.delete(`${BACKEND_API}/deletesignup/${user._id}`, { headers: { Authorization: token } });
+      await axiosInstance.delete(`/deletesignup/${user._id}`);
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.dispatchEvent(new Event('authChanged'));
@@ -87,6 +85,31 @@ const Profile = () => {
       toast.error('Failed to delete account');
     } finally {
       setShowDeleteConfirm(false);
+    }
+  };
+
+  // -------------------- Change password UI --------------------
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [changing, setChanging] = useState(false);
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!oldPassword || !newPassword) { toast.info('Enter old and new password'); return; }
+    setChanging(true);
+    try {
+      await axiosInstance.post(`/profile/change-password`, { oldPassword, newPassword });
+      toast.success('Password updated');
+      setOldPassword('');
+      setNewPassword('');
+      setShowChangePassword(false);
+    } catch (err) {
+      console.error(err);
+      const msg = err?.response?.data?.data?.message || err?.response?.data?.message || err?.message;
+      toast.error(msg || 'Failed to update password');
+    } finally {
+      setChanging(false);
     }
   };
 
@@ -119,8 +142,27 @@ const Profile = () => {
             <div className="mt-3">
               <Button type="submit" className="btn-accent">Save Profile</Button>
               <Button variant="outline-light" className="ms-2" onClick={handleDeleteAccount}>Delete Account</Button>
+              <Button variant="outline-light" className="ms-2" onClick={() => setShowChangePassword(!showChangePassword)}>Change Password</Button>
             </div>
           </Form>
+
+          {showChangePassword && (
+            <Form className="mt-3" onSubmit={handleChangePassword}>
+              <h5 style={{ color: '#fff', marginTop: 20 }}>Change Password</h5>
+              <Row className="g-3">
+                <Col md={6}>
+                  <Form.Control type="password" placeholder="Old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} required />
+                </Col>
+                <Col md={6}>
+                  <Form.Control type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                </Col>
+              </Row>
+              <div className="mt-3">
+                <Button type="submit" className="btn-accent" disabled={changing}>{changing ? 'Updating...' : 'Update Password'}</Button>
+              </div>
+            </Form>
+          )}
+
         </Col>
       </Row>
       <ConfirmModal
@@ -137,5 +179,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
-
