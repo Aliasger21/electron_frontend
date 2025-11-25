@@ -15,51 +15,40 @@ import VerifySuccess from "../pages/user/VerifySuccess";
 import Profile from "../pages/user/Profile";
 import MyOrders from "../pages/user/MyOrders";
 
-// New pages
+// New pages for forgot/reset flow
 import ForgotPassword from "../pages/user/ForgotPassword";
 import EnterResetOtp from "../pages/user/EnterResetOtp";
 import NewPassword from "../pages/user/NewPassword";
 
-import ShippingInfo from "../pages/other/ShippingInfo.jsx";
-import ReturnsRefunds from "../pages/other/ReturnsRefunds.jsx";
-import FAQ from "../pages/other/FAQ.jsx";
-import PrivacyPolicy from "../pages/other/PrivacyPolicy.jsx";
-
 const UserRoutes = () => {
-  return (
-    <Routes>
-      <Route element={<UserLayout />}>
-        <Route index element={<Home />} />
-        <Route path="products" element={<Products />} />
-        <Route path="about" element={<About />} />
-        <Route path="contact" element={<Contact />} />
-        <Route path="products/:id" element={<ProductDetail />} />
-        <Route path="cart" element={<Cart />} />
-        <Route path="checkout" element={<Checkout />} />
+    return (
+        <Routes>
+            <Route element={<UserLayout />}>
+                <Route index element={<Home />} />
+                <Route path="products" element={<Products />} />
+                <Route path="about" element={<About />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="products/:id" element={<ProductDetail />} />
+                <Route path="cart" element={<Cart />} />
+                <Route path="checkout" element={<Checkout />} />
 
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
+                <Route path="login" element={<Login />} />
+                <Route path="register" element={<Register />} />
 
-        {/* Verification (OTP) route */}
-        <Route path="verify" element={<VerifyOTP />} />
-        <Route path="verify-success" element={<VerifySuccess />} />
+                {/* Verification (OTP) route — replaced token link with OTP verification */}
+                <Route path="verify" element={<VerifyOTP />} />
+                <Route path="verify-success" element={<VerifySuccess />} />
 
-        {/* Forgot / Reset password flow (email-OTP) */}
-        <Route path="forgot-password" element={<ForgotPassword />} />
-        <Route path="enter-reset-otp" element={<EnterResetOtp />} />
-        <Route path="reset-password" element={<NewPassword />} />
+                {/* Forgot / Reset password flow (email-OTP) */}
+                <Route path="forgot-password" element={<ForgotPassword />} />
+                <Route path="enter-reset-otp" element={<EnterResetOtp />} />
+                <Route path="reset-password" element={<NewPassword />} />
 
-        <Route path="profile" element={<Profile />} />
-        <Route path="orders" element={<MyOrders />} />
-
-        {/* Customer service pages */}
-        <Route path="shipping-info" element={<ShippingInfo />} />
-        <Route path="returns-refunds" element={<ReturnsRefunds />} />
-        <Route path="faq" element={<FAQ />} />
-        <Route path="privacy-policy" element={<PrivacyPolicy />} />
-      </Route>
-    </Routes>
-  );
+                <Route path="profile" element={<Profile />} />
+                <Route path="orders" element={<MyOrders />} />
+            </Route>
+        </Routes>
+    );
 };
 
 export default UserRoutes;
