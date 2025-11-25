@@ -2,12 +2,12 @@
 import axiosInstance from "../utils/axiosInstance";
 
 /**
- * Normalize various user shapes into a predictable object.
+ * Normalize user objects coming from various API shapes.
  */
 export function normalizeUser(obj) {
   if (!obj || typeof obj !== "object") return null;
   return {
-    _id: obj._id || obj.id || obj.userId || undefined,
+    _id: obj._id || obj.id || obj.userId,
     firstname:
       obj.firstname ||
       obj.firstName ||
@@ -24,29 +24,76 @@ export function normalizeUser(obj) {
 }
 
 /**
- * Save normalized user to localStorage and notify app.
+ * Save user to localStorage and notify app.
  */
 export function saveUserToLocal(u) {
   const normalized = normalizeUser(u);
   if (!normalized) return;
   localStorage.setItem("user", JSON.stringify(normalized));
-  // also ensure axiosInstance has Authorization header if token exists
-  // (token handling separate; see setToken)
   window.dispatchEvent(new Event("authChanged"));
-  // console.log("saveUserToLocal:", normalized);
 }
 
 /**
- * Set token in localStorage and axiosInstance default headers.
+ * Store token in localStorage + axios headers.
  */
 export function setToken(token) {
   if (!token) return;
   localStorage.setItem("token", token);
   try {
     axiosInstance.defaults.headers = axiosInstance.defaults.headers || {};
-    axiosInstance.defaults.headers.common = axiosInstance.defaults.headers.common || {};
+    axiosInstance.defaults.headers.common =
+      axiosInstance.defaults.headers.common || {};
     axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  } catch (err) {
-    // ignore
+  } catch {}
+}
+
+/**
+ * 🔥 Full secure logout:
+ * - Clears token
+ * - Clears user
+ * - Clears cookies (if any)
+ * - Dispatches authChanged so React updates immediately
+ * - Optional toast
+ * - Optional redirect
+ */
+export function clearAuth({
+  redirect = true,
+  toast = null, // string | null
+} = {}) {
+  try {
+    localStorage.removeItem("token");
+  } catch {}
+  try {
+    localStorage.removeItem("user");
+  } catch {}
+
+  // clear cookies (works if backend uses cookies for tokens)
+  try {
+    document.cookie.split(";").forEach((c) => {
+      document.cookie =
+        c.replace(/^ +/, "").replace(/=.*/, "") +
+        "=;expires=" +
+        new Date(0).toUTCString() +
+        ";path=/";
+    });
+  } catch {}
+
+  // broadcast logout to all components
+  try {
+    window.dispatchEvent(new Event("authChanged"));
+  } catch {}
+
+  // optional toast
+  if (toast && window?.toast) {
+    try {
+      window.toast.info(toast);
+    } catch {}
+  }
+
+  // redirect to login page after clearing
+  if (redirect) {
+    try {
+      window.location.replace("/login");
+    } catch {}
   }
 }
