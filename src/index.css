@@ -1,6 +1,35 @@
-/* ------------------ Global ------------------ */
-/* Keep consistent box-sizing globally but do not reset margins/padding */
+/* === Page-size & scroll helpers (safe, targeted) === */
+/* Put these near the top of index.css (replace the previous :root/min-height rules) */
+
+/* realistic header/footer heights (desktop defaults) */
+:root {
+  --header-height: 64px;   /* header height on desktop */
+  --footer-height: 64px;   /* footer height on desktop */
+}
+
+/* reduce header/footer on smaller screens (optional) */
+@media (max-width: 768px) {
+  :root {
+    --header-height: 56px;  /* mobile header */
+    --footer-height: 56px;  /* mobile footer */
+  }
+}
+
+/* IMPORTANT: apply the viewport-filling min-height only to actual page content containers.
+   Use the .container-page wrapper (or .admin-content for your admin layout) instead of targeting
+   .container or .py-5 globally (those are used everywhere and caused the issue).
+*/
+.container-page,
+.admin-content {
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  box-sizing: border-box;
+  /* ensure content starts under header */
+  padding-top: 1rem;
+}
+
+/* Keep consistent box-sizing globally but avoid forcing min-height on all containers */
 * { box-sizing: border-box; }
+
 
 html, body {
   font-family: 'Poppins', sans-serif !important;

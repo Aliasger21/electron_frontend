@@ -1,0 +1,49 @@
+/* Profile.css
+   Normalizes EdButton and bootstrap Button sizes,
+   styles the red delete button with black text.
+*/
+
+.profile-btn {
+    padding: 10px 18px !important;
+    font-size: 0.95rem !important;
+    height: 43px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+  }
+  
+  /* Delete button: red bg, black text */
+  .profile-btn-danger {
+    background: #ff4b4b !important;
+    border: 1px solid #cc2f2f !important;
+    color: #000 !important;        /* black text */
+    box-shadow: none !important;
+  }
+  
+  /* hover for delete */
+  .profile-btn-danger:hover {
+    background: #ff6b6b !important;
+    color: #000 !important;
+  }
+  
+  /* ensure EdButton inherits size (if EdButton styles are heavier, this will still normalize) */
+  .profile-btn,
+  .profile-btn-danger {
+    line-height: 1 !important;
+  }
+  
+  /* small responsive tweak */
+  @media (max-width: 576px) {
+    .profile-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  
+    .profile-btn + .profile-btn,
+    .profile-btn + .btn,
+    .btn + .profile-btn {
+      margin-top: 8px;
+    }
+  }
+  

@@ -1,101 +1,175 @@
 // src/pages/user/Login.jsx
-import { Container, Row, Col, Form } from 'react-bootstrap';
-import { useState } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
-import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Form } from "react-bootstrap";
+import { useState } from "react";
+import axiosInstance from "../../utils/axiosInstance";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
-import EdButton from '../../components/ui/button';
-import Input from '../../components/ui/Input';
-import Card from '../../components/ui/Card';
+import EdButton from "../../components/ui/button";
+import Input from "../../components/ui/Input";
+import Card from "../../components/ui/Card";
 
+import { saveUserToLocal, setToken } from "../../utils/authHelpers";
+
+/**
+ * Robust login:
+ * - stores token via setToken()
+ * - saves full user via saveUserToLocal()
+ * - if login returns only token, calls /authverify to fetch profile
+ */
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const [loading, setLoading] = useState(false);
+  const submit = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    setLoading(true);
 
-    const submit = async (e) => {
-        e.preventDefault();
-        if (loading) return;
-        setLoading(true);
+    try {
+      const res = await axiosInstance.post("/loginsignup", { email, password });
+      const d = res?.data ?? {};
+
+      // best-effort token extraction
+      const token =
+        d.token ||
+        d.data?.token ||
+        d.data?.authToken ||
+        d.data?.data?.token ||
+        d.authToken ||
+        res?.headers?.authorization ||
+        null;
+
+      // best-effort user extraction
+      let userObj =
+        d.user ||
+        d.data?.user ||
+        d.data?.data?.user ||
+        d.data?.data ||
+        d.data ||
+        null;
+
+      // set token first so subsequent authverify uses it
+      if (token) setToken(token);
+
+      // if login response already includes a full user => save
+      if (userObj && typeof userObj === "object") {
+        if (userObj.user) userObj = userObj.user;
+        saveUserToLocal(userObj);
+      } else if (token) {
+        // if only token returned, fetch profile
         try {
-            const res = await axiosInstance.post(`/loginsignup`, { email, password });
-            const payload = res.data && res.data.data ? res.data.data : {};
-            const token = payload.token || res.data.token;
-            const userObj = payload.data || payload.user || null;
-            if (token) localStorage.setItem('token', token);
-            if (userObj) localStorage.setItem('user', JSON.stringify(userObj));
-            window.dispatchEvent(new Event('authChanged'));
-            toast.success('Logged in');
-            navigate('/');
+          const verifyRes = await axiosInstance.post("/authverify", {});
+          const u = verifyRes?.data?.data?.data || verifyRes?.data?.data || verifyRes?.data || verifyRes;
+          if (u) saveUserToLocal(u);
         } catch (err) {
-            console.error(err);
-            const msg = err?.response?.data?.data?.message || err?.response?.data?.message || err?.message;
-            if (err?.response?.status === 403 && msg && msg.toLowerCase().includes('verify')) {
-                toast.error('Email not verified. Please verify first.');
-                navigate('/verify-otp');
-            } else if (err?.response?.status === 404) {
-                toast.info('Email not registered. Redirecting to registration...');
-                navigate('/register');
-            } else {
-                toast.error('Login failed');
-            }
-        } finally {
-            setLoading(false);
+          // failed to fetch profile; still keep token so other flows can retry
+          // console.warn("authverify after login failed", err);
         }
-    };
+      }
 
-    const resendVerification = async () => {
-        if (!email) { toast.info('Enter your email above to resend verification'); return; }
-        try {
-            await axiosInstance.post(`/resend-verification`, { email });
-            toast.success('Verification email resent');
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to resend verification');
-        }
-    };
+      toast.success("Logged in");
+      // navigate to profile so user can immediately verify info; change to "/" if you prefer
+      navigate("/profile");
+    } catch (err) {
+      console.error(err);
+      const msg =
+        err?.response?.data?.data?.message ||
+        err?.response?.data?.message ||
+        err?.response?.data ||
+        err?.message ||
+        "Login failed";
 
-    return (
-        <Container className="py-5">
-            <Row className="justify-content-center">
-                <Col md={6}>
-                    <Card>
-                        <h3 className="text-white fw-bold">Login</h3>
-                        <Form onSubmit={submit} className="mt-3">
-                            <Form.Group className="mb-3">
-                                <Form.Label>Email</Form.Label>
-                                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Password</Form.Label>
-                                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                            </Form.Group>
-                            <div>
-                                <EdButton type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</EdButton>
-                            </div>
+      if (err?.response?.status === 403 && String(msg).toLowerCase().includes("verify")) {
+        toast.error("Email not verified. Please verify first.");
+        navigate("/verify-otp");
+      } else if (err?.response?.status === 404) {
+        toast.info("Email not registered. Redirecting to registration...");
+        navigate("/register");
+      } else {
+        toast.error(typeof msg === "string" ? msg : "Login failed");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                            <div className="mt-3 text-muted">
-                                New here? <a href="/register">Create an account</a>
-                            </div>
+  const resendVerification = async () => {
+    if (!email) {
+      toast.info("Enter your email above to resend verification");
+      return;
+    }
+    try {
+      await axiosInstance.post("/resend-verification", { email });
+      toast.success("Verification email resent");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to resend verification");
+    }
+  };
 
-                            <div className="mt-2 text-muted">
-                                <a href="/forgot-password" className="text-primary text-decoration-underline fw-semibold">
-                                    Forgot password?
-                                </a>
-                            </div>
+  return (
+    <Container className="py-5">
+      <Row className="justify-content-center">
+        <Col md={6}>
+          <Card>
+            <h3 className="text-white fw-bold">Login</h3>
+            <Form onSubmit={submit} className="mt-3">
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  name="email"
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Password</Form.Label>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  name="password"
+                />
+              </Form.Group>
+              <div>
+                <EdButton type="submit" disabled={loading}>
+                  {loading ? "Logging in..." : "Login"}
+                </EdButton>
+              </div>
 
-                            <div className="mt-2 text-muted">
-                                Didn't receive verification? <a role="button" onClick={resendVerification} className="text-primary text-decoration-underline fw-semibold" style={{ cursor: 'pointer' }}>Resend verification</a>
-                            </div>
-                        </Form>
-                    </Card>
-                </Col>
-            </Row>
-        </Container>
-    );
+              <div className="mt-3 text-muted">
+                New here? <a href="/register">Create an account</a>
+              </div>
+
+              <div className="mt-2 text-muted">
+                <a href="/forgot-password" className="text-primary text-decoration-underline fw-semibold">
+                  Forgot password?
+                </a>
+              </div>
+
+              <div className="mt-2 text-muted">
+                Didn't receive verification?{" "}
+                <a
+                  role="button"
+                  onClick={resendVerification}
+                  className="text-primary text-decoration-underline fw-semibold"
+                  style={{ cursor: "pointer" }}
+                >
+                  Resend verification
+                </a>
+              </div>
+            </Form>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
+  );
 };
 
 export default Login;

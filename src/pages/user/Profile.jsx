@@ -1,188 +1,421 @@
 // src/pages/user/Profile.jsx
-import { Container, Row, Col, Form } from 'react-bootstrap';
-import { useEffect, useState } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
-import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-import ConfirmModal from '../../components/common/ConfirmModal';
+import { Container, Row, Col, Form } from "react-bootstrap";
+import { useEffect, useState, useCallback } from "react";
+import axiosInstance from "../../utils/axiosInstance";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import ConfirmModal from "../../components/common/ConfirmModal";
 
-import EdButton from '../../components/ui/button';
-import Input from '../../components/ui/Input';
-import Card from '../../components/ui/Card';
-import Skeleton from '../../components/ui/Skeleton';
+import EdButton from "../../components/ui/button";
+import Card from "../../components/ui/Card";
+import Skeleton from "../../components/ui/Skeleton";
+
+import "./Profile.css";
+
+const AVATAR_FALLBACK = `data:image/svg+xml;utf8,
+<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'>
+  <rect width='100%' height='100%' fill='%23f3f3f3'/>
+  <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-size='18'>Avatar</text>
+</svg>`;
+
+const readStoredUser = () => {
+  try {
+    const raw = localStorage.getItem("user");
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
 
 const Profile = () => {
-  const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('user')) || null } catch { return null }
-  });
-  const [form, setForm] = useState({ firstname: '', lastname: '', email: '', phone: '', address: '' });
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    (async () => {
-      try {
-        const res = await axiosInstance.post(`/authverify`, {}); // axiosInstance will attach token
-        const u = res.data?.data?.data || res.data?.data || res.data;
-        if (u) {
-          setUser(u);
-          localStorage.setItem('user', JSON.stringify(u));
-          setForm({ firstname: u.firstname || '', lastname: u.lastname || '', email: u.email || '', phone: u.phone || '', address: u.address || '' });
-          setPreview(u.profilePic || '');
-        }
-      } catch (err) {
-        // ignore silently — user may need to login
-      }
-    })();
+  // init from localStorage so first render has values
+  const storedUser = readStoredUser();
+  const [user, setUser] = useState(storedUser);
+  const [form, setForm] = useState({
+    firstname: storedUser?.firstname || "",
+    lastname: storedUser?.lastname || "",
+    email: storedUser?.email || "",
+    phone: storedUser?.phone || "",
+    address: storedUser?.address || "",
+  });
+  const [preview, setPreview] = useState(storedUser?.profilePic || AVATAR_FALLBACK);
+  const [file, setFile] = useState(null);
+
+  // show skeleton while fetching authoritative profile
+  const [loading, setLoading] = useState(Boolean(!storedUser));
+
+  // saved state for button success feedback
+  const [saved, setSaved] = useState(false);
+
+  // sync from localStorage (used on authChanged and storage events)
+  const syncFromStorage = useCallback(() => {
+    const u = readStoredUser();
+    if (!u) return;
+    setUser(u);
+    setForm({
+      firstname: u.firstname || "",
+      lastname: u.lastname || "",
+      email: u.email || "",
+      phone: u.phone || "",
+      address: u.address || "",
+    });
+    setPreview(u.profilePic || AVATAR_FALLBACK);
   }, []);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  useEffect(() => {
+    syncFromStorage();
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    (async () => {
+      setLoading(true);
+      try {
+        // ensure axios has token (axiosInstance should already)
+        const res = await axiosInstance.post("/authverify", {});
+        const u = res?.data?.data?.data || res?.data?.data || res?.data || null;
+        if (u) {
+          localStorage.setItem("user", JSON.stringify(u));
+          syncFromStorage();
+        }
+      } catch (err) {
+        // ignore
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [syncFromStorage]);
+
+  // listen to authChanged (login/logout)
+  useEffect(() => {
+    window.addEventListener("authChanged", syncFromStorage);
+    return () => window.removeEventListener("authChanged", syncFromStorage);
+  }, [syncFromStorage]);
+
+  // listen to storage (other tabs or writes)
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === "user") setTimeout(syncFromStorage, 0);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [syncFromStorage]);
+
+  useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith("blob:")) {
+        try {
+          URL.revokeObjectURL(preview);
+        } catch {}
+      }
+    };
+  }, [preview]);
+
+  const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const handleFile = (e) => {
-    const f = e.target.files[0];
+    const f = e.target.files?.[0] || null;
     setFile(f);
+
+    if (preview && preview.startsWith("blob:")) {
+      try { URL.revokeObjectURL(preview); } catch {}
+    }
+
     if (f) setPreview(URL.createObjectURL(f));
+    else setPreview(user?.profilePic || AVATAR_FALLBACK);
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    if (!token) { toast.info('Please login'); navigate('/login'); return; }
+    const token = localStorage.getItem("token");
+    if (!token) { toast.info("Please login"); navigate("/login"); return; }
+    if (!user) { toast.error("User not loaded"); return; }
+
     try {
-      // update fields
       await axiosInstance.put(`/updatesignup/${user._id}`, form);
-      // upload file if any
       if (file) {
-        const fd = new FormData(); fd.append('file', file);
-        const r2 = await axiosInstance.post(`/updatesignup/${user._id}/photo`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-        form.profilePic = r2.data.data.profilePic;
+        const fd = new FormData();
+        fd.append("file", file);
+        const r2 = await axiosInstance.post(`/updatesignup/${user._id}/photo`, fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        const newPic = r2?.data?.data?.profilePic || r2?.data?.profilePic || r2?.data;
+        if (newPic) {
+          form.profilePic = newPic;
+          setPreview(newPic);
+        }
       }
       const updatedUser = { ...user, ...form };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      window.dispatchEvent(new Event('authChanged'));
-      toast.success('Profile updated');
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      window.dispatchEvent(new Event("authChanged"));
+      toast.success("Profile updated");
+
+      // show success state on button briefly
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
     } catch (err) {
       console.error(err);
       const serverMsg = err?.response?.data?.data?.message || err?.response?.data?.message || err?.message;
-      toast.error(serverMsg || 'Failed to update profile');
+      toast.error(serverMsg || "Failed to update profile");
     }
   };
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  const handleDeleteAccount = () => {
-    setShowDeleteConfirm(true);
-  };
+  const handleDeleteAccount = () => setShowDeleteConfirm(true);
 
   const confirmDeleteAccount = async () => {
+    if (!user) { toast.error("User not available"); setShowDeleteConfirm(false); return; }
     try {
       await axiosInstance.delete(`/deletesignup/${user._id}`);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.dispatchEvent(new Event('authChanged'));
-      toast.success('Account deleted');
-      navigate('/');
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.dispatchEvent(new Event("authChanged"));
+      toast.success("Account deleted");
+      navigate("/");
     } catch (err) {
       console.error(err);
-      toast.error('Failed to delete account');
+      toast.error("Failed to delete account");
     } finally {
       setShowDeleteConfirm(false);
     }
   };
 
-  // -------------------- Change password UI --------------------
   const [showChangePassword, setShowChangePassword] = useState(false);
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [changing, setChanging] = useState(false);
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    if (!oldPassword || !newPassword) { toast.info('Enter old and new password'); return; }
+    if (!oldPassword || !newPassword) { toast.info("Enter old and new password"); return; }
     setChanging(true);
     try {
-      await axiosInstance.post(`/profile/change-password`, { oldPassword, newPassword });
-      toast.success('Password updated');
-      setOldPassword('');
-      setNewPassword('');
+      await axiosInstance.post("/profile/change-password", { oldPassword, newPassword });
+      toast.success("Password updated");
+      setOldPassword("");
+      setNewPassword("");
       setShowChangePassword(false);
     } catch (err) {
       console.error(err);
       const msg = err?.response?.data?.data?.message || err?.response?.data?.message || err?.message;
-      toast.error(msg || 'Failed to update password');
+      toast.error(msg || "Failed to update password");
     } finally {
       setChanging(false);
     }
   };
 
-  if (!user) return (
-    <Container className="py-5 text-center"><p style={{ color: '#fff' }}>Please login to edit profile.</p></Container>
-  );
+  if (!user && !loading) {
+    return (
+      <Container className="py-5 text-center">
+        <p style={{ color: "#fff" }}>Please login to edit profile.</p>
+      </Container>
+    );
+  }
 
   return (
     <Container className="py-5">
+      {/* Scoped responsive styles for avatar preview + small layout tweaks and button styles */}
+      <style>{`
+        .avatar-preview {
+          width: 180px;
+          max-width: 40vw;
+          aspect-ratio: 1 / 1;
+          background: #fff;
+          border-radius: 12px;
+          padding: 6px;
+          box-sizing: border-box;
+          margin: 0 auto;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .avatar-preview img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          border-radius: 8px;
+        }
+
+        @media (max-width: 576px) {
+          .avatar-preview { width: 34vw; max-width: 140px; padding: 6px; }
+        }
+
+        /* make action buttons stack nicely on very small screens */
+        .profile-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+        @media (max-width: 480px) {
+          .profile-actions { flex-direction: column; align-items: stretch; }
+          .profile-actions .ed-btn, .profile-actions .btn { width: 100%; }
+        }
+
+        /* Unified button transitions & sizing */
+        .profile-actions .ed-btn, .profile-actions .btn {
+          transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+          padding: 0.6rem 1rem;
+          border-radius: 8px;
+          font-weight: 600;
+        }
+        .profile-btn { font-weight: 600; }
+        .profile-btn-danger {
+          font-weight: 700;
+          border: 1px solid rgba(255,255,255,0.06);
+          background: transparent;
+        }
+        .profile-btn-danger:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+          background: rgba(255,255,255,0.04);
+        }
+
+        /* success style override for EdButton when saved */
+        .ed-btn--success {
+  background: var(--success) !important;
+  color: #000 !important;
+  border: none !important;
+  box-shadow: 0 6px 18px rgba(56,176,0,0.18) !important;
+}
+
+
+        /* Save button green theme */
+        .profile-btn-save {
+          background: #28c76f !important;   /* Green */
+          color: #000 !important;
+          border: none !important;
+          box-shadow: 0 4px 12px rgba(40,199,111,0.25) !important;
+        }
+
+        .profile-btn-save:hover {
+          transform: translateY(-2px);
+          background: #22b463 !important;   /* Darker green hover */
+        }
+
+        /* small focus/hover polish for ed-btns */
+        .ed-btn:hover { transform: translateY(-2px); }
+      `}</style>
+
       <Row>
-        <Col md={4} className="text-center">
+        <Col md={4} className="text-center mb-4 mb-md-0">
           <Card className="text-center">
             <div className="avatar-preview" style={{ marginBottom: 12 }}>
-              <img src={preview || 'https://via.placeholder.com/180'} alt="profile" style={{ width: 180, height: 180, borderRadius: 8, objectFit: 'cover' }} />
+              {loading ? (
+                <Skeleton variant="avatar" />
+              ) : (
+                <img src={preview || AVATAR_FALLBACK} alt="profile" />
+              )}
             </div>
             <Form.Group className="mt-3 px-2">
-              <Form.Label style={{ color: 'var(--text)' }}>Change Profile Picture</Form.Label>
+              <Form.Label style={{ color: "var(--text)" }}>Change Profile Picture</Form.Label>
               <Form.Control type="file" accept="image/*" onChange={handleFile} />
             </Form.Group>
           </Card>
         </Col>
+
         <Col md={8}>
-          <h3 style={{ color: '#fff' }}>Edit Profile</h3>
+          <h3 style={{ color: "#fff" }}>Edit Profile</h3>
+
           <Form className="mt-3" onSubmit={handleSave}>
             <Row className="g-3">
               <Col md={6}>
-                <Input name="firstname" value={form.firstname} onChange={handleChange} placeholder="First name" required />
+                {loading ? (
+                  <Skeleton height="2.4rem" className="w-100 mb-3" />
+                ) : (
+                  <Form.Control name="firstname" value={form.firstname} onChange={handleChange} placeholder="First name" required />
+                )}
               </Col>
+
               <Col md={6}>
-                <Input name="lastname" value={form.lastname} onChange={handleChange} placeholder="Last name" required />
+                {loading ? (
+                  <Skeleton height="2.4rem" className="w-100 mb-3" />
+                ) : (
+                  <Form.Control name="lastname" value={form.lastname} onChange={handleChange} placeholder="Last name" required />
+                )}
               </Col>
+
               <Col md={12}>
-                <Input type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email" required />
+                {loading ? (
+                  <Skeleton height="2.4rem" className="w-100 mb-3" />
+                ) : (
+                  <Form.Control type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email" required />
+                )}
               </Col>
+
               <Col md={6}>
-                <Input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" />
+                {loading ? <Skeleton height="2.4rem" className="w-100 mb-3" /> : <Form.Control name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" />}
               </Col>
+
               <Col md={6}>
-                {/* keep textarea as bootstrap control for simplicity */}
-                <Form.Control as="textarea" rows={5} name="address" value={form.address} onChange={handleChange} placeholder="Address" />
+                {loading ? (
+                  <Skeleton height="6rem" className="w-100 mb-3" />
+                ) : (
+                  <Form.Control as="textarea" rows={5} name="address" value={form.address} onChange={handleChange} placeholder="Address" />
+                )}
               </Col>
             </Row>
-            <div className="mt-3">
-              <EdButton type="submit" className="me-2">Save Profile</EdButton>
-              <Button variant="outline" className="me-2" onClick={handleDeleteAccount}>Delete Account</Button>
-              <Button variant="outline" onClick={() => setShowChangePassword(!showChangePassword)}>Change Password</Button>
+
+            <div className="mt-3 profile-actions">
+              {loading ? (
+                <>
+                  <Skeleton width="140px" height="40px" className="me-2" />
+                  <Skeleton width="140px" height="40px" className="me-2" />
+                  <Skeleton width="140px" height="40px" />
+                </>
+              ) : (
+                <>
+                  {/* Save button: when saved === true, show green success style and disable */}
+                  <EdButton
+  type="submit"
+  className={`me-2 profile-btn ${saved ? 'ed-btn--success' : 'profile-btn-save'}`}
+  disabled={saved}
+>
+  {saved ? "Success" : "Save Profile"}
+</EdButton>
+
+
+                  {/* Delete account: use EdButton for consistent look, plus a danger outline visual */}
+                  <EdButton
+                    type="button"
+                    className="me-2 profile-btn profile-btn-danger"
+                    onClick={handleDeleteAccount}
+                  >
+                    Delete Account
+                  </EdButton>
+
+                  <EdButton type="button" className="profile-btn" onClick={() => setShowChangePassword(!showChangePassword)}>
+                    Change Password
+                  </EdButton>
+                </>
+              )}
             </div>
           </Form>
 
           {showChangePassword && (
             <Form className="mt-3" onSubmit={handleChangePassword}>
-              <h5 style={{ color: '#fff', marginTop: 20 }}>Change Password</h5>
+              <h5 style={{ color: "#fff", marginTop: 20 }}>Change Password</h5>
               <Row className="g-3">
                 <Col md={6}>
-                  <Input type="password" placeholder="Old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} required />
+                  <Form.Control type="password" placeholder="Old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} required />
                 </Col>
                 <Col md={6}>
-                  <Input type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                  <Form.Control type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
                 </Col>
               </Row>
               <div className="mt-3">
-                <Button type="submit" disabled={changing}>{changing ? 'Updating...' : 'Update Password'}</Button>
+                <EdButton type="submit" className="profile-btn" disabled={changing}>{changing ? "Updating..." : "Update Password"}</EdButton>
               </div>
             </Form>
           )}
-
         </Col>
       </Row>
+
       <ConfirmModal
         show={showDeleteConfirm}
         title="Delete account"

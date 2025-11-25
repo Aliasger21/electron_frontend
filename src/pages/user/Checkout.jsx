@@ -1,7 +1,7 @@
 // src/pages/user/Checkout.jsx
 import { Container, Row, Col, Form } from "react-bootstrap";
 import { useCart } from "../../context/CartContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 import { toast } from "react-toastify";
@@ -17,9 +17,26 @@ const Checkout = () => {
   const [customer, setCustomer] = useState({ name: "", email: "", address: "", phone: "" });
   const navigate = useNavigate();
 
-  const total = cart.reduce((s, it) => s + Number(it.price || 0) * (it.qty || 1), 0);
+  // guard to prevent double-running side effects in Strict Mode (dev)
+  const didRunRef = useRef(false);
+
+  const total = cart.reduce((s, it) => s + Number(it.price || 0) * Number(it.qty || 1), 0);
 
   useEffect(() => {
+    // protect against double-run in React Strict Mode during development
+    if (didRunRef.current) return;
+    didRunRef.current = true;
+
+    // Redirect immediately if not logged in
+    const token = localStorage.getItem("token");
+    if (!token) {
+      // toastId prevents duplicate toasts if this somehow fires more than once
+      toast.info("Please login to continue", { toastId: "checkout-login-redirect" });
+      navigate("/login");
+      return;
+    }
+
+    // Load user info if logged in
     const loadUser = () => {
       try {
         const raw = localStorage.getItem("user");
@@ -34,15 +51,16 @@ const Checkout = () => {
           phone: u.phone || c.phone,
         }));
       } catch (e) {
-        // ignore
+        // ignore parsing errors
       }
     };
 
     loadUser();
+
     const onAuth = () => loadUser();
     window.addEventListener("authChanged", onAuth);
     return () => window.removeEventListener("authChanged", onAuth);
-  }, []);
+  }, [navigate]);
 
   const handleChange = (e) => setCustomer({ ...customer, [e.target.name]: e.target.value });
 
@@ -52,7 +70,8 @@ const Checkout = () => {
 
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.info("Please log in or register before placing an order");
+      // fallback check (shouldn't normally happen because of page-level redirect)
+      toast.info("Please log in or register before placing an order", { toastId: "checkout-login-redirect" });
       navigate("/login");
       return;
     }
@@ -60,7 +79,8 @@ const Checkout = () => {
     setLoading(true);
     try {
       if (showLoading) showLoading("Placing your order...");
-    } catch { }
+    } catch {}
+
     try {
       const payload = {
         items: cart.map(({ _id, productname, price, qty }) => ({ productId: _id, productname, price, qty })),
@@ -68,7 +88,7 @@ const Checkout = () => {
       };
 
       // axiosInstance attaches Authorization and baseURL
-      const res = await axiosInstance.post(`/orders`, payload);
+      await axiosInstance.post(`/orders`, payload);
       toast.success("Order placed successfully");
       clearCart();
       navigate("/");
@@ -85,7 +105,7 @@ const Checkout = () => {
       setLoading(false);
       try {
         if (hideLoading) hideLoading();
-      } catch { }
+      } catch {}
     }
   };
 
@@ -107,7 +127,14 @@ const Checkout = () => {
 
             <Form.Group className="mb-3">
               <Form.Label>Address</Form.Label>
-              <Form.Control as="textarea" rows={3} name="address" value={customer.address} onChange={handleChange} required />
+              <Form.Control
+                as="textarea"
+                rows={3}
+                name="address"
+                value={customer.address}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -127,10 +154,21 @@ const Checkout = () => {
             <div className="mt-3" style={{ color: "var(--text-muted)" }}>
               {cart.map((it) => (
                 <div key={it._id} className="d-flex justify-content-between mb-2">
-                  <div style={{ color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 8 }}>
+                  <div
+                    style={{
+                      color: "#fff",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      marginRight: 8,
+                    }}
+                    title={`${it.productname} x ${it.qty}`}
+                  >
                     {it.productname} x {it.qty}
                   </div>
-                  <div style={{ color: "var(--accent)" }}>₹{(it.qty * it.price).toFixed(2)}</div>
+                  <div style={{ color: "var(--accent)" }}>
+                    ₹{(Number(it.qty || 1) * Number(it.price || 0)).toFixed(2)}
+                  </div>
                 </div>
               ))}
 

@@ -23,6 +23,7 @@
   --shadow-xs: 0 1px 4px rgba(0,0,0,0.13);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
   --shadow-lg: 0 8px 25px rgba(0,180,216,0.18);
+  --focus-ring: rgba(0,180,216,0.18);
 }
 
 /* Button utility classes (can remain here for now) */
@@ -32,13 +33,45 @@
   border: 0;
   cursor: pointer;
   font-weight: 600;
-  transition: transform .12s ease, box-shadow .12s ease;
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, color .12s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none; /* ensures Link rendering has no underline */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-.ed-btn--primary{ background: var(--accent); color: #000; }
-.ed-btn--outline{ background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.08); }
+
+/* Ensure links rendered with this class don't get default link styles */
+.ed-btn,
+.ed-btn:visited,
+.ed-btn:active {
+  text-decoration: none !important;
+  outline: none;
+}
+
+/* Color variants */
+.ed-btn--primary { background: var(--accent); color: #000; }
+.ed-btn--outline { background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.08); }
+
+/* Hover / focus for buttons */
+.ed-btn:hover,
+.ed-btn:focus {
+  text-decoration: none !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Accessible focus-visible */
+.ed-btn:focus-visible {
+  box-shadow: 0 6px 18px var(--focus-ring);
+  outline: 2px solid rgba(0,180,216,0.28);
+  outline-offset: 3px;
+}
 
 /* Inputs */
-.ed-input{
+.ed-input {
   width:100%;
   padding: 0.6rem 0.8rem;
   border-radius: 8px;
@@ -47,40 +80,63 @@
   color: var(--text);
   box-sizing: border-box;
 }
-.ed-input--error{ border-color: #e11d48; }
-.ed-input-error{ color: #fca5a5; margin-top: 6px; font-size: 0.9rem; }
+.ed-input--error { border-color: #e11d48; }
+.ed-input-error { color: #fca5a5; margin-top: 6px; font-size: 0.9rem; }
 
 /* Card */
-.ed-card{
+.ed-card {
   background: var(--bg-card);
   padding: var(--space-2);
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
-}
-
-/* Utility spacing + helpers */
-.container-page{ padding: var(--space-3); }
-h2, h3 { color: var(--text); }
-.text-muted{ color: var(--text-muted); }
-
-/* Card hover */
-.ed-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
   transition: transform .15s ease, box-shadow .15s ease;
 }
 
+/* Utility spacing + helpers */
+.container-page { padding: var(--space-3); }
+h2, h3 { color: var(--text); }
+.text-muted { color: var(--text-muted); }
+
+/* Card hover - keep but reduce aggressiveness (cards already have .card-hover for some elements) */
+.ed-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
 /* Skeleton loader (kept as is) */
-.ed-skeleton{
+.ed-skeleton {
   height: 12px;
   background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.2s linear infinite;
   border-radius: 6px;
 }
-@keyframes shimmer{
+@keyframes shimmer {
   from { background-position: 200% 0; }
   to { background-position: -200% 0; }
+}
+
+/* ==== Animation & card helpers used across the app ==== */
+/* Fade/slide reveal */
+.fade-in { opacity: 0; transform: translateY(8px); transition: opacity .45s ease, transform .45s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* Card hover helper (used on clickable cards to add subtle lift & shadow) */
+.card-hover { transition: transform .25s ease, box-shadow .25s ease; will-change: transform; }
+.card-hover:hover,
+.card-hover:focus { transform: translateY(-6px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+
+/* Image scale inside hoverable cards */
+.card-img-scale { transition: transform .35s ease; will-change: transform; }
+.card-hover:hover .card-img-scale,
+.card-hover:focus .card-img-scale { transform: scale(1.06); }
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in,
+  .card-hover,
+  .card-img-scale,
+  .ed-btn { transition: none !important; transform: none !important; box-shadow: none !important; }
 }
 
 /* ==== Utility Classes ==== */
@@ -118,3 +174,67 @@ h2, h3 { color: var(--text); }
   .container-page { padding: var(--space-2); }
   .ed-btn { padding: 0.55rem 0.85rem; }
 }
+/* =========================
+   EdButton strong overrides
+   (Fixes disappearing text on hover when rendered as Link)
+   Place at the end of design-tokens.css
+   ========================= */
+
+   a.ed-btn, a.ed-btn:link, a.ed-btn:visited, a.ed-btn:active {
+    /* ensure anchor-buttons keep the same button styles */
+    text-decoration: none !important;
+    color: inherit !important;
+    opacity: 1 !important;
+  }
+  
+  /* Force the variant colors on anchor/button hover/focus/active states */
+  .ed-btn--primary,
+  a.ed-btn--primary {
+    background: var(--accent) !important;
+    color: #000 !important;
+  }
+  
+  .ed-btn--primary:hover,
+  .ed-btn--primary:focus,
+  a.ed-btn--primary:hover,
+  a.ed-btn--primary:focus {
+    color: #000 !important;        /* keep text visible */
+    text-decoration: none !important;
+    opacity: 1 !important;
+  }
+  
+  /* Outline variant */
+  .ed-btn--outline,
+  a.ed-btn--outline {
+    color: var(--text) !important;
+    border-color: rgba(255,255,255,0.08) !important;
+  }
+  
+  .ed-btn--outline:hover,
+  .ed-btn--outline:focus,
+  a.ed-btn--outline:hover,
+  a.ed-btn--outline:focus {
+    color: var(--text) !important;
+    text-decoration: none !important;
+    opacity: 1 !important;
+  }
+  
+  /* Prevent child elements (spans/icons) inheriting weird opacity/visibility on hover */
+  .ed-btn * {
+    color: inherit !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-decoration: none !important;
+  }
+  
+  /* If some global anchor hover rule sets opacity or color, this undoes it */
+  a.ed-btn:hover, a.ed-btn:focus {
+    opacity: 1 !important;
+    text-decoration: none !important;
+  }
+  
+  /* High-specificity safety: anchor rendered variant with class + role */
+  a[class*="ed-btn"] {
+    text-decoration: none !important;
+  }
+  
