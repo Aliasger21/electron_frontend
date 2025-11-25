@@ -1,4 +1,3 @@
-// src/pages/user/Login.jsx
 import { Container, Row, Col, Form } from "react-bootstrap";
 import { useState } from "react";
 import axiosInstance from "../../utils/axiosInstance";
@@ -8,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import EdButton from "../../components/ui/button";
 import Input from "../../components/ui/Input";
 import Card from "../../components/ui/Card";
+import PasswordInput from "../../components/ui/PasswordInput";
+import LoadingOverlay from '../../components/ui/LoadingOverlay';
 
 import { saveUserToLocal, setToken } from "../../utils/authHelpers";
 
@@ -32,7 +33,6 @@ const Login = () => {
       const res = await axiosInstance.post("/loginsignup", { email, password });
       const d = res?.data ?? {};
 
-      // best-effort token extraction
       const token =
         d.token ||
         d.data?.token ||
@@ -42,7 +42,6 @@ const Login = () => {
         res?.headers?.authorization ||
         null;
 
-      // best-effort user extraction
       let userObj =
         d.user ||
         d.data?.user ||
@@ -51,27 +50,22 @@ const Login = () => {
         d.data ||
         null;
 
-      // set token first so subsequent authverify uses it
       if (token) setToken(token);
 
-      // if login response already includes a full user => save
       if (userObj && typeof userObj === "object") {
         if (userObj.user) userObj = userObj.user;
         saveUserToLocal(userObj);
       } else if (token) {
-        // if only token returned, fetch profile
         try {
           const verifyRes = await axiosInstance.post("/authverify", {});
           const u = verifyRes?.data?.data?.data || verifyRes?.data?.data || verifyRes?.data || verifyRes;
           if (u) saveUserToLocal(u);
         } catch (err) {
-          // failed to fetch profile; still keep token so other flows can retry
-          // console.warn("authverify after login failed", err);
+          // ignore
         }
       }
 
       toast.success("Logged in");
-      // navigate to profile so user can immediately verify info; change to "/" if you prefer
       navigate("/profile");
     } catch (err) {
       console.error(err);
@@ -112,6 +106,7 @@ const Login = () => {
 
   return (
     <Container className="py-5">
+      <LoadingOverlay show={loading} message="Logging in..." />
       <Row className="justify-content-center">
         <Col md={6}>
           <Card>
@@ -119,28 +114,16 @@ const Login = () => {
             <Form onSubmit={submit} className="mt-3">
               <Form.Group className="mb-3">
                 <Form.Label>Email</Form.Label>
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  name="email"
-                />
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required name="email" />
               </Form.Group>
+
               <Form.Group className="mb-3">
                 <Form.Label>Password</Form.Label>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  name="password"
-                />
+                <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required name="password" />
               </Form.Group>
+
               <div>
-                <EdButton type="submit" disabled={loading}>
-                  {loading ? "Logging in..." : "Login"}
-                </EdButton>
+                <EdButton type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</EdButton>
               </div>
 
               <div className="mt-3 text-muted">
@@ -148,19 +131,12 @@ const Login = () => {
               </div>
 
               <div className="mt-2 text-muted">
-                <a href="/forgot-password" className="text-primary text-decoration-underline fw-semibold">
-                  Forgot password?
-                </a>
+                <a href="/forgot-password" className="text-primary text-decoration-underline fw-semibold">Forgot password?</a>
               </div>
 
               <div className="mt-2 text-muted">
                 Didn't receive verification?{" "}
-                <a
-                  role="button"
-                  onClick={resendVerification}
-                  className="text-primary text-decoration-underline fw-semibold"
-                  style={{ cursor: "pointer" }}
-                >
+                <a role="button" onClick={resendVerification} className="text-primary text-decoration-underline fw-semibold" style={{ cursor: "pointer" }}>
                   Resend verification
                 </a>
               </div>

@@ -1,4 +1,3 @@
-// src/pages/user/Profile.jsx
 import { Container, Row, Col, Form } from "react-bootstrap";
 import { useEffect, useState, useCallback } from "react";
 import axiosInstance from "../../utils/axiosInstance";
@@ -9,6 +8,8 @@ import ConfirmModal from "../../components/common/ConfirmModal";
 import EdButton from "../../components/ui/button";
 import Card from "../../components/ui/Card";
 import Skeleton from "../../components/ui/Skeleton";
+import PasswordInput from "../../components/ui/PasswordInput";
+import LoadingOverlay from '../../components/ui/LoadingOverlay';
 
 import "./Profile.css";
 
@@ -47,8 +48,17 @@ const Profile = () => {
   // show skeleton while fetching authoritative profile
   const [loading, setLoading] = useState(Boolean(!storedUser));
 
+  // saving state for profile updates
+  const [saving, setSaving] = useState(false);
+
   // saved state for button success feedback
   const [saved, setSaved] = useState(false);
+
+  // change-password states
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [changing, setChanging] = useState(false);
 
   // sync from localStorage (used on authChanged and storage events)
   const syncFromStorage = useCallback(() => {
@@ -77,7 +87,6 @@ const Profile = () => {
     (async () => {
       setLoading(true);
       try {
-        // ensure axios has token (axiosInstance should already)
         const res = await axiosInstance.post("/authverify", {});
         const u = res?.data?.data?.data || res?.data?.data || res?.data || null;
         if (u) {
@@ -136,7 +145,9 @@ const Profile = () => {
     const token = localStorage.getItem("token");
     if (!token) { toast.info("Please login"); navigate("/login"); return; }
     if (!user) { toast.error("User not loaded"); return; }
+    if (saving) return;
 
+    setSaving(true);
     try {
       await axiosInstance.put(`/updatesignup/${user._id}`, form);
       if (file) {
@@ -164,6 +175,8 @@ const Profile = () => {
       console.error(err);
       const serverMsg = err?.response?.data?.data?.message || err?.response?.data?.message || err?.message;
       toast.error(serverMsg || "Failed to update profile");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -187,14 +200,10 @@ const Profile = () => {
     }
   };
 
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [changing, setChanging] = useState(false);
-
   const handleChangePassword = async (e) => {
     e.preventDefault();
     if (!oldPassword || !newPassword) { toast.info("Enter old and new password"); return; }
+    if (changing) return;
     setChanging(true);
     try {
       await axiosInstance.post("/profile/change-password", { oldPassword, newPassword });
@@ -221,6 +230,8 @@ const Profile = () => {
 
   return (
     <Container className="py-5">
+      <LoadingOverlay show={saving || changing} message={changing ? "Updating password..." : "Saving profile..."} />
+
       {/* Scoped responsive styles for avatar preview + small layout tweaks and button styles */}
       <style>{`
         .avatar-preview {
@@ -249,7 +260,6 @@ const Profile = () => {
           .avatar-preview { width: 34vw; max-width: 140px; padding: 6px; }
         }
 
-        /* make action buttons stack nicely on very small screens */
         .profile-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
         @media (max-width: 480px) {
@@ -257,7 +267,6 @@ const Profile = () => {
           .profile-actions .ed-btn, .profile-actions .btn { width: 100%; }
         }
 
-        /* Unified button transitions & sizing */
         .profile-actions .ed-btn, .profile-actions .btn {
           transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
           padding: 0.6rem 1rem;
@@ -276,18 +285,15 @@ const Profile = () => {
           background: rgba(255,255,255,0.04);
         }
 
-        /* success style override for EdButton when saved */
         .ed-btn--success {
-  background: var(--success) !important;
-  color: #000 !important;
-  border: none !important;
-  box-shadow: 0 6px 18px rgba(56,176,0,0.18) !important;
-}
+          background: var(--success) !important;
+          color: #000 !important;
+          border: none !important;
+          box-shadow: 0 6px 18px rgba(56,176,0,0.18) !important;
+        }
 
-
-        /* Save button green theme */
         .profile-btn-save {
-          background: #28c76f !important;   /* Green */
+          background: #28c76f !important;
           color: #000 !important;
           border: none !important;
           box-shadow: 0 4px 12px rgba(40,199,111,0.25) !important;
@@ -295,10 +301,9 @@ const Profile = () => {
 
         .profile-btn-save:hover {
           transform: translateY(-2px);
-          background: #22b463 !important;   /* Darker green hover */
+          background: #22b463 !important;
         }
 
-        /* small focus/hover polish for ed-btns */
         .ed-btn:hover { transform: translateY(-2px); }
       `}</style>
 
@@ -370,26 +375,24 @@ const Profile = () => {
                 </>
               ) : (
                 <>
-                  {/* Save button: when saved === true, show green success style and disable */}
                   <EdButton
-  type="submit"
-  className={`me-2 profile-btn ${saved ? 'ed-btn--success' : 'profile-btn-save'}`}
-  disabled={saved}
->
-  {saved ? "Success" : "Save Profile"}
-</EdButton>
+                    type="submit"
+                    className={`me-2 profile-btn ${saved ? 'ed-btn--success' : 'profile-btn-save'}`}
+                    disabled={saved || saving}
+                  >
+                    {saved ? "Success" : saving ? "Saving..." : "Save Profile"}
+                  </EdButton>
 
-
-                  {/* Delete account: use EdButton for consistent look, plus a danger outline visual */}
                   <EdButton
                     type="button"
                     className="me-2 profile-btn profile-btn-danger"
                     onClick={handleDeleteAccount}
+                    disabled={saving || changing}
                   >
                     Delete Account
                   </EdButton>
 
-                  <EdButton type="button" className="profile-btn" onClick={() => setShowChangePassword(!showChangePassword)}>
+                  <EdButton type="button" className="profile-btn" onClick={() => setShowChangePassword(!showChangePassword)} disabled={saving || changing}>
                     Change Password
                   </EdButton>
                 </>
@@ -402,14 +405,14 @@ const Profile = () => {
               <h5 style={{ color: "#fff", marginTop: 20 }}>Change Password</h5>
               <Row className="g-3">
                 <Col md={6}>
-                  <Form.Control type="password" placeholder="Old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} required />
+                  <PasswordInput placeholder="Old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} required name="oldPassword" />
                 </Col>
                 <Col md={6}>
-                  <Form.Control type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                  <PasswordInput placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required name="newPassword" />
                 </Col>
               </Row>
               <div className="mt-3">
-                <EdButton type="submit" className="profile-btn" disabled={changing}>{changing ? "Updating..." : "Update Password"}</EdButton>
+                <EdButton type="submit" className="profile-btn" disabled={changing || saving}>{changing ? "Updating..." : "Update Password"}</EdButton>
               </div>
             </Form>
           )}
