@@ -378,8 +378,8 @@ const Home = () => {
                     className="ed-card p-4 clickable-card card-hover"
                     tabIndex={0}
                     style={{
-                        minHeight: "190px",
-                        height: "190px",
+                        minHeight: "210px",
+                        height: "210px",
                         width: "100%",
                         display: "flex",
                         flexDirection: "column",

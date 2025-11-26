@@ -1,177 +1,253 @@
 // src/pages/ProductDetail.jsx
-import { Container, Row, Col, Badge } from "react-bootstrap";
-import { useEffect, useState, useRef } from "react";
-import { toast } from 'react-toastify';
+import React, { useEffect, useRef, useState } from "react";
+import { Container, Badge } from "react-bootstrap";
+import { toast } from "react-toastify";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import { BACKEND_API } from '../../config';
-import Loading from '../../components/common/Loading';
+import { BACKEND_API } from "../../config";
+import Loading from "../../components/common/Loading";
 import { useCart } from "../../context/CartContext";
-import EdButton from '../../components/ui/button';
+import EdButton from "../../components/ui/button";
 
-const ProductDetail = () => {
+export default function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
-  const { addToCart } = useCart();
-  const controllerRef = useRef(null);
-
-  // price formatter
-  const priceFmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+  const cartCtx = useCart();
+  const addToCart = cartCtx?.addToCart;
+  const containerRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
     const controller = new AbortController();
-    controllerRef.current = controller;
 
     async function fetchProduct() {
       setLoading(true);
       try {
-        const res = await axios.get(`${BACKEND_API}/products/${id}`, { signal: controller.signal });
-        if (!mounted) return;
-        setProduct(res.data.product || null);
+        const res = await axios.get(`${BACKEND_API}/products/${id}`, {
+          signal: controller.signal,
+        });
+        const fetched = res?.data?.product ?? res?.data ?? null;
+        if (mounted) setProduct(fetched);
       } catch (err) {
-        const isAbort = err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED' || err?.message?.toLowerCase?.().includes('canceled');
-        if (!isAbort) {
-          console.error("Failed to fetch product:", err);
-          toast.error("Failed to load product");
-        }
+        if (!mounted) return;
+        console.error("Product fetch error:", err);
+        toast.error(err?.response?.data?.message || "Failed to load product.");
       } finally {
         if (mounted) setLoading(false);
       }
     }
 
-    fetchProduct();
+    if (id) fetchProduct();
+    else {
+      setLoading(false);
+      setProduct(null);
+    }
+
     return () => {
       mounted = false;
-      try { controller.abort(); } catch {}
+      try {
+        controller.abort();
+      } catch { }
     };
   }, [id]);
+
+  const handleAddToCart = () => {
+    try {
+      const qtyNum = Math.max(1, Math.floor(Number(qty) || 1));
+      if (typeof addToCart === "function") {
+        addToCart(product, qtyNum);
+        toast.success("Added to cart");
+      } else {
+        toast.info("Add-to-cart not available");
+      }
+    } catch (err) {
+      console.error("Add to cart error:", err);
+      toast.error("Could not add to cart");
+    }
+  };
 
   if (loading) return <Loading message="Loading product..." />;
   if (!product) return <Container className="py-5 text-center">Product not found.</Container>;
 
-  const handleAddToCart = () => {
-    const safeQty = Math.max(1, Math.floor(Number(qty) || 1));
-    if (typeof addToCart === "function") {
-      addToCart(product, safeQty);
-      toast.success("Added to cart");
-    } else {
-      toast.info("Add-to-cart not available");
-    }
-  };
+  const image =
+    product?.image ||
+    product?.images?.[0] ||
+    "https://via.placeholder.com/1200x800?text=No+Image";
+
+  const name = product?.productname || product?.name || "Unnamed product";
+  const description = product?.description || "No description available.";
+  const category = product?.category || "Uncategorized";
+  const brand = product?.brand || "";
+  const priceRaw = product?.price ?? null;
+
+  const formattedPrice =
+    typeof priceRaw === "number"
+      ? new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+      }).format(priceRaw)
+      : priceRaw
+        ? `₹${priceRaw}`
+        : "Price not available";
 
   return (
-    <Container className="py-5">
-      {/* Scoped responsive styles for the detail page */}
+    <div
+      ref={containerRef}
+      style={{
+        padding: 0,
+        width: "100%",
+        boxSizing: "border-box",
+        overflowX: "hidden",
+        maxWidth: "1200px",
+        margin: "40px auto 0",
+      }}
+    >
+      {/* LOCAL CSS FIXED FOR RESPONSIVENESS */}
       <style>{`
-        /* Image container keeps uniform aspect and scales responsively */
-        .pd-image-container {
+        .pd-grid {
+          display: flex;
+          gap: 20px;
+          align-items: flex-start;
+        }
+        .pd-left { flex: 1; }
+        .pd-right { width: 360px; }
+
+        .pd-viewport {
           width: 100%;
-          max-width: 520px;
-          height: min(52vh, 520px);
+          max-width: 600px;
+          height: 460px;
           background: #fff;
           border-radius: 12px;
-          padding: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
           overflow: hidden;
-          margin: 0 auto;
+          margin: auto;
+          padding: 10px;
         }
-        .pd-image-container img {
+        .pd-img {
           width: 100%;
           height: 100%;
           object-fit: contain;
-          display: block;
         }
 
-        /* Layout tweaks for small screens */
-        @media (max-width: 992px) {
-          .pd-image-container { max-width: 420px; height: min(46vh, 420px); }
-        }
-        @media (max-width: 576px) {
-          .pd-image-container { max-width: calc(100vw - 32px); height: min(50vh, 360px); padding: 8px; }
-          /* make buttons wrap nicely on small screens */
-          .pd-actions { flex-direction: column; gap: 10px; align-items: stretch; }
-          .pd-actions .ed-btn { width: 100%; justify-content: center; }
+        .pd-actions {
+          display: flex;
+          gap: 12px;
+          align-items: center;
         }
 
-        /* Keep consistent gap between input and buttons */
-        .pd-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-
-        /* Input responsive style */
         .pd-qty-input {
-          width: 96px;
-          padding: 8px 10px;
+          height: 34px;
+          padding: 6px 10px;
           border-radius: 8px;
-          border: 1px solid rgba(255,255,255,0.06);
-          background: transparent;
-          color: var(--text);
+          border: 1px solid #ddd;
+          width: 80px;
+          max-width: 80px;
+        }
+
+        /* MOBILE STYLING */
+        @media (max-width: 992px) {
+          .pd-grid {
+            flex-direction: column;
+            padding: 0 6vw;
+          }
+          .pd-right {
+            width: 100%;
+            margin-top: 18px;
+          }
+          .pd-viewport {
+            height: 46vw;
+            min-height: 210px;
+            max-height: 420px;
+            padding: 4vw 2vw;
+          }
+
+          /* STACK BUTTONS */
+          .pd-actions {
+            flex-direction: column;
+            gap: 10px;
+            align-items: stretch;
+          }
+
+          /* FULL WIDTH BUTTONS */
+          .pd-add-btn,
+          .pd-cart-btn {
+            width: 100% !important;
+            display: block;
+          }
+
+          .pd-qty-input {
+            width: 100%;
+          }
         }
       `}</style>
 
-      <Row>
-        {/* Image column - on small screens this will stack above details automatically */}
-        <Col md={6} className="d-flex justify-content-center align-items-center mb-4 mb-md-0">
-          <div
-            className="pd-image-container"
-            role="img"
-            aria-label={product.productname}
-          >
+      <div className="pd-grid">
+        {/* LEFT SIDE IMAGE */}
+        <div className="pd-left">
+          <div className="pd-viewport">
             <img
-              src={product.image || "https://via.placeholder.com/400"}
-              alt={product.productname}
-              loading="lazy"
+              src={image}
+              alt={name}
+              className="pd-img"
+              onError={(e) =>
+              (e.currentTarget.src =
+                "https://via.placeholder.com/1200x800?text=No+Image")
+              }
             />
           </div>
-        </Col>
+        </div>
 
-        {/* Details column */}
-        <Col md={6}>
-          <h2 style={{ color: "#fff" }}>{product.productname}</h2>
-          <p style={{ color: "var(--text-muted)" }}>{product.description}</p>
+        {/* RIGHT SIDE INFO */}
+        <div className="pd-right">
+          <h2 style={{ margin: "0.5rem 0" }}>{name}</h2>
+          <p style={{ color: "var(--text-muted)" }}>{description}</p>
 
-          <p style={{ margin: '0.5rem 0' }}>
-            <strong style={{ color: "var(--accent)", fontSize: '1.25rem' }}>
-              {typeof product.price === "number" ? priceFmt.format(product.price) : `₹${product.price}`}
+          <p style={{ margin: "0.5rem 0" }}>
+            <strong style={{ color: "var(--accent)", fontSize: "1.25rem" }}>
+              {formattedPrice}
             </strong>
           </p>
 
-          <p style={{ margin: '0.5rem 0' }}>
-            <Badge style={{ backgroundColor: "var(--accent)" }}>{product.category}</Badge>
-            <span style={{ color: "var(--text-muted)", marginLeft: 10 }}>{product.brand}</span>
+          <p style={{ margin: "0.5rem 0" }}>
+            <Badge style={{ backgroundColor: "var(--accent)" }}>
+              {category}
+            </Badge>
+            {brand ? (
+              <span style={{ color: "var(--text-muted)", marginLeft: 10 }}>
+                {brand}
+              </span>
+            ) : null}
           </p>
 
+          {/* ACTION BUTTONS */}
           <div className="pd-actions mt-4">
             <input
+              id="pd-qty"
+              className="pd-qty-input"
               type="number"
               min={1}
               value={qty}
               onChange={(e) => {
                 const v = Number(e.target.value);
-                if (Number.isNaN(v)) return setQty(1);
-                setQty(Math.max(1, Math.floor(v)));
+                setQty(Number.isNaN(v) ? 1 : Math.max(1, Math.floor(v)));
               }}
-              className="pd-qty-input"
-              aria-label="Quantity"
             />
 
-            <EdButton onClick={handleAddToCart} className="px-3 py-2">
+            <EdButton onClick={handleAddToCart} className="pd-add-btn">
               Add to Cart
             </EdButton>
 
             <Link to="/cart" className="text-decoration-none">
-              <EdButton as="a" variant="outline" className="px-3 py-2">
-                Go to Cart
-              </EdButton>
+              <EdButton className="pd-cart-btn">Go to Cart</EdButton>
             </Link>
           </div>
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
-};
-
-export default ProductDetail;
+}

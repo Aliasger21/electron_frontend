@@ -1,5 +1,5 @@
+import React, { useState } from "react";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import { useState } from "react";
 import axiosInstance from "../../utils/axiosInstance";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -7,22 +7,46 @@ import { useNavigate } from "react-router-dom";
 import EdButton from "../../components/ui/button";
 import Input from "../../components/ui/Input";
 import Card from "../../components/ui/Card";
-import PasswordInput from "../../components/ui/PasswordInput";
 import LoadingOverlay from '../../components/ui/LoadingOverlay';
 
 import { saveUserToLocal, setToken } from "../../utils/authHelpers";
 
-/**
- * Robust login:
- * - stores token via setToken()
- * - saves full user via saveUserToLocal()
- * - if login returns only token, calls /authverify to fetch profile
- */
-const Login = () => {
+const tryExtractToken = (res) => {
+  if (!res) return null;
+  const d = res?.data ?? {};
+  return (
+    d.token ||
+    d.authToken ||
+    d.data?.token ||
+    d.data?.authToken ||
+    d.data?.data?.token ||
+    res?.headers?.authorization ||
+    res?.headers?.Authorization ||
+    null
+  );
+};
+
+const tryExtractUser = (res) => {
+  if (!res) return null;
+  const d = res?.data ?? {};
+  return (
+    d.user ||
+    d.data?.user ||
+    d.data?.data?.user ||
+    d.data?.data ||
+    d.data ||
+    d ||
+    null
+  );
+};
+
+export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -31,24 +55,9 @@ const Login = () => {
 
     try {
       const res = await axiosInstance.post("/loginsignup", { email, password });
-      const d = res?.data ?? {};
 
-      const token =
-        d.token ||
-        d.data?.token ||
-        d.data?.authToken ||
-        d.data?.data?.token ||
-        d.authToken ||
-        res?.headers?.authorization ||
-        null;
-
-      let userObj =
-        d.user ||
-        d.data?.user ||
-        d.data?.data?.user ||
-        d.data?.data ||
-        d.data ||
-        null;
+      const token = tryExtractToken(res);
+      let userObj = tryExtractUser(res);
 
       if (token) setToken(token);
 
@@ -56,19 +65,20 @@ const Login = () => {
         if (userObj.user) userObj = userObj.user;
         saveUserToLocal(userObj);
       } else if (token) {
+        // try to fetch authoritative profile if login didn't return user
         try {
-          const verifyRes = await axiosInstance.post("/authverify", {});
-          const u = verifyRes?.data?.data?.data || verifyRes?.data?.data || verifyRes?.data || verifyRes;
+          const av = await axiosInstance.post("/authverify", {});
+          const u = av?.data?.data?.data || av?.data?.data || av?.data || av;
           if (u) saveUserToLocal(u);
-        } catch (err) {
-          // ignore
+        } catch (e) {
+          // ignore: might mean account needs verification
         }
       }
 
       toast.success("Logged in");
       navigate("/profile");
     } catch (err) {
-      console.error(err);
+      console.error("Login error:", err);
       const msg =
         err?.response?.data?.data?.message ||
         err?.response?.data?.message ||
@@ -78,7 +88,7 @@ const Login = () => {
 
       if (err?.response?.status === 403 && String(msg).toLowerCase().includes("verify")) {
         toast.error("Email not verified. Please verify first.");
-        navigate("/verify-otp");
+        navigate(`/verifyOTP?email=${encodeURIComponent(email)}`);
       } else if (err?.response?.status === 404) {
         toast.info("Email not registered. Redirecting to registration...");
         navigate("/register");
@@ -95,12 +105,23 @@ const Login = () => {
       toast.info("Enter your email above to resend verification");
       return;
     }
+    if (resending) return;
+    setResending(true);
     try {
-      await axiosInstance.post("/resend-verification", { email });
-      toast.success("Verification email resent");
+      const res = await axiosInstance.post("/resend-otp", { email });
+      const msg = res?.data?.data?.message || res?.data?.message || "Verification email resent";
+      toast.success(msg);
+      navigate(`/verifyOTP?email=${encodeURIComponent(email)}`);
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to resend verification");
+      console.error("Resend OTP error:", err);
+      const msg =
+        err?.response?.data?.data?.message ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to resend verification";
+      toast.error(typeof msg === "string" ? msg : "Failed to resend verification");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -119,11 +140,16 @@ const Login = () => {
 
               <Form.Group className="mb-3">
                 <Form.Label>Password</Form.Label>
-                <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required name="password" />
+                <div style={{ position: "relative" }}>
+                  <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required name="password" />
+                  <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", right: 8, top: 8, background: "transparent", border: "none", padding: 6, cursor: "pointer", color: "#666" }} aria-label={showPassword ? "Hide password" : "Show password"}>
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
               </Form.Group>
 
               <div>
-                <EdButton type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</EdButton>
+                <EdButton type="submit" disabled={loading}>{loading ? "Logging in..." : "Login"}</EdButton>
               </div>
 
               <div className="mt-3 text-muted">
@@ -136,8 +162,8 @@ const Login = () => {
 
               <div className="mt-2 text-muted">
                 Didn't receive verification?{" "}
-                <a role="button" onClick={resendVerification} className="text-primary text-decoration-underline fw-semibold" style={{ cursor: "pointer" }}>
-                  Resend verification
+                <a role="button" onClick={resendVerification} className="text-primary text-decoration-underline fw-semibold" style={{ cursor: resending ? "not-allowed" : "pointer", opacity: resending ? 0.6 : 1 }}>
+                  {resending ? "Resending..." : "Resend verification"}
                 </a>
               </div>
             </Form>
@@ -146,6 +172,4 @@ const Login = () => {
       </Row>
     </Container>
   );
-};
-
-export default Login;
+}

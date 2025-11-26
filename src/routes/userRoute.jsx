@@ -9,13 +9,13 @@ import About from "../pages/user/About";
 import Contact from "../pages/user/Contact";
 import Login from "../pages/user/Login";
 import Register from "../pages/user/Register";
-// NOTE: Using the new VerifyOTP component (OTP-based verification & auto-login)
+// OTP verification
 import VerifyOTP from "../pages/user/VerifyOTP";
 import VerifySuccess from "../pages/user/VerifySuccess";
+import LegacyVerifyRedirect from "../pages/user/LegacyVerifyRedirect"; // <--- new
 import Profile from "../pages/user/Profile";
 import MyOrders from "../pages/user/MyOrders";
 
-// New pages
 import ForgotPassword from "../pages/user/ForgotPassword";
 import EnterResetOtp from "../pages/user/EnterResetOtp";
 import NewPassword from "../pages/user/NewPassword";
@@ -40,11 +40,15 @@ const UserRoutes = () => {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
 
-        {/* Verification (OTP) route */}
-        <Route path="verify" element={<VerifyOTP />} />
+        {/* OTP verification route (used now) */}
+        <Route path="verifyOTP" element={<VerifyOTP />} />
+
+        {/* Legacy token-link route (keeps old email links working).
+            It will try to verify token if provided, otherwise redirect to OTP flow. */}
+        <Route path="verify" element={<LegacyVerifyRedirect />} />
+
         <Route path="verify-success" element={<VerifySuccess />} />
 
-        {/* Forgot / Reset password flow (email-OTP) */}
         <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="enter-reset-otp" element={<EnterResetOtp />} />
         <Route path="reset-password" element={<NewPassword />} />
@@ -52,7 +56,6 @@ const UserRoutes = () => {
         <Route path="profile" element={<Profile />} />
         <Route path="orders" element={<MyOrders />} />
 
-        {/* Customer service pages */}
         <Route path="shipping-info" element={<ShippingInfo />} />
         <Route path="returns-refunds" element={<ReturnsRefunds />} />
         <Route path="faq" element={<FAQ />} />

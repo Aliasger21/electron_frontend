@@ -1,5 +1,5 @@
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import { useEffect, useState, useCallback } from "react";
 import axiosInstance from "../../utils/axiosInstance";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,6 @@ import ConfirmModal from "../../components/common/ConfirmModal";
 import EdButton from "../../components/ui/button";
 import Card from "../../components/ui/Card";
 import Skeleton from "../../components/ui/Skeleton";
-import PasswordInput from "../../components/ui/PasswordInput";
 import LoadingOverlay from '../../components/ui/LoadingOverlay';
 
 import "./Profile.css";
@@ -28,6 +27,14 @@ const readStoredUser = () => {
     return null;
   }
 };
+
+const passwordRulesProfile = [
+  { id: 'len', label: 'At least 8 characters', test: (s) => s.length >= 8 },
+  { id: 'upper', label: 'One uppercase letter', test: (s) => /[A-Z]/.test(s) },
+  { id: 'lower', label: 'One lowercase letter', test: (s) => /[a-z]/.test(s) },
+  { id: 'digit', label: 'One number', test: (s) => /[0-9]/.test(s) },
+  { id: 'special', label: 'One special character', test: (s) => /[^A-Za-z0-9]/.test(s) },
+];
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -59,6 +66,8 @@ const Profile = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [changing, setChanging] = useState(false);
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
 
   // sync from localStorage (used on authChanged and storage events)
   const syncFromStorage = useCallback(() => {
@@ -76,30 +85,50 @@ const Profile = () => {
   }, []);
 
   useEffect(() => {
-    syncFromStorage();
-
     const token = localStorage.getItem("token");
+
+    // If no token → user not logged in → stop loading
     if (!token) {
       setLoading(false);
       return;
     }
 
-    (async () => {
-      setLoading(true);
+    const fetchUser = async () => {
       try {
+        setLoading(true);
+
         const res = await axiosInstance.post("/authverify", {});
-        const u = res?.data?.data?.data || res?.data?.data || res?.data || null;
+        // your backend ALWAYS returns user here:
+        const u = res?.data?.data?.data;
+
         if (u) {
+          // update localStorage
           localStorage.setItem("user", JSON.stringify(u));
-          syncFromStorage();
+
+          // update UI
+          setUser(u);
+          setForm({
+            firstname: u.firstname || "",
+            lastname: u.lastname || "",
+            email: u.email || "",
+            phone: u.phone || "",
+            address: u.address || "",
+          });
+          setPreview(u.profilePic || AVATAR_FALLBACK);
+
+          // notify other components
+          window.dispatchEvent(new Event("authChanged"));
         }
       } catch (err) {
-        // ignore
+        console.error("Profile fetch error:", err);
       } finally {
         setLoading(false);
       }
-    })();
-  }, [syncFromStorage]);
+    };
+
+    fetchUser();
+  }, []);
+
 
   // listen to authChanged (login/logout)
   useEffect(() => {
@@ -121,7 +150,7 @@ const Profile = () => {
       if (preview && preview.startsWith("blob:")) {
         try {
           URL.revokeObjectURL(preview);
-        } catch {}
+        } catch { }
       }
     };
   }, [preview]);
@@ -133,7 +162,7 @@ const Profile = () => {
     setFile(f);
 
     if (preview && preview.startsWith("blob:")) {
-      try { URL.revokeObjectURL(preview); } catch {}
+      try { URL.revokeObjectURL(preview); } catch { }
     }
 
     if (f) setPreview(URL.createObjectURL(f));
@@ -204,6 +233,12 @@ const Profile = () => {
     e.preventDefault();
     if (!oldPassword || !newPassword) { toast.info("Enter old and new password"); return; }
     if (changing) return;
+
+    // validate new password locally
+    const results = passwordRulesProfile.map(r => ({ ...r, ok: r.test(newPassword) }));
+    const allOk = results.every(r => r.ok);
+    if (!allOk) { toast.info('Please fix new password issues before submitting'); return; }
+
     setChanging(true);
     try {
       await axiosInstance.post("/profile/change-password", { oldPassword, newPassword });
@@ -219,6 +254,8 @@ const Profile = () => {
       setChanging(false);
     }
   };
+
+  const validationNewPass = useMemo(() => passwordRulesProfile.map(r => ({ ...r, ok: r.test(newPassword) })), [newPassword]);
 
   if (!user && !loading) {
     return (
@@ -405,10 +442,37 @@ const Profile = () => {
               <h5 style={{ color: "#fff", marginTop: 20 }}>Change Password</h5>
               <Row className="g-3">
                 <Col md={6}>
-                  <PasswordInput placeholder="Old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} required name="oldPassword" />
+                  <div style={{ position: 'relative' }}>
+                    <Form.Control placeholder="Old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} required type={showOld ? 'text' : 'password'} />
+                    <button type="button" onClick={() => setShowOld(s => !s)} style={{ position: 'absolute', right: 8, top: 8, background: 'transparent', border: 'none', padding: 6, cursor: 'pointer', color: '#666' }} aria-label={showOld ? 'Hide old password' : 'Show old password'}>
+                      {showOld ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22" /></svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" /><circle cx="12" cy="12" r="3" /></svg>
+                      )}
+                    </button>
+                  </div>
                 </Col>
                 <Col md={6}>
-                  <PasswordInput placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required name="newPassword" />
+                  <div style={{ position: 'relative' }}>
+                    <Form.Control placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required type={showNew ? 'text' : 'password'} />
+                    <button type="button" onClick={() => setShowNew(s => !s)} style={{ position: 'absolute', right: 8, top: 8, background: 'transparent', border: 'none', padding: 6, cursor: 'pointer', color: '#666' }} aria-label={showNew ? 'Hide new password' : 'Show new password'}>
+                      {showNew ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22" /></svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" /><circle cx="12" cy="12" r="3" /></svg>
+                      )}
+                    </button>
+                  </div>
+
+                  <div style={{ marginTop: 8 }}>
+                    {validationNewPass.map(r => (
+                      <div key={r.id} style={{ color: r.ok ? '#8ee' : '#f66', display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <small>{r.ok ? '✓' : '•'}</small>
+                        <small>{r.label}</small>
+                      </div>
+                    ))}
+                  </div>
                 </Col>
               </Row>
               <div className="mt-3">

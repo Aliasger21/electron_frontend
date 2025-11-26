@@ -36,7 +36,7 @@ html, body {
   background-color: var(--bg-dark);
   color: var(--text);
   margin: 0;
-  overflow-y: scroll; /* always reserve vertical scrollbar */
+  
 }
 
 /* ------------------ Layout Container ------------------ */
@@ -392,3 +392,442 @@ html, body {
 
 /* loading spinner size helper */
 .loading-spinner { width: 48px; height: 48px; }
+/* Recent orders redesign */
+.recent-orders-list .order-card-row {
+  transition: transform .16s ease, box-shadow .16s ease;
+  border: 1px solid rgba(255,255,255,0.04);
+  background: var(--bg-card, #0f1724);
+  color: var(--text, #fff);
+  border-radius: 8px;
+}
+.recent-orders-list .order-card-row:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 28px rgba(2,6,23,0.6);
+}
+
+.order-left { width: 180px; min-width: 140px; }
+.order-left .order-id { font-weight: 700; font-size: 14px; color: #fff; }
+.order-left .order-customer { font-size: 13px; margin-top: 4px; }
+.order-left .order-date { font-size: 12px; color: #9aa3b2; margin-top: 6px; }
+
+.order-middle { display:flex; align-items:center; }
+.items-preview { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+.item-pill {
+  background: rgba(255,255,255,0.03);
+  padding: 6px 8px;
+  border-radius: 999px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  font-size: 13px;
+}
+.item-pill .item-name { max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-pill .item-qty { color: #9aa3b2; }
+
+.more-items { margin-left: 6px; color: #9aa3b2; }
+
+.order-right { min-width: 140px; width: 140px; }
+
+.status-badge {
+  padding: 6px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.status-paid, .status-completed, .status-delivered {
+  background: rgba(16,185,129,0.12);
+  color: #10b981;
+}
+.status-pending, .status-processing {
+  background: rgba(245,158,11,0.08);
+  color: #f59e0b;
+}
+.status-cancelled, .status-refunded {
+  background: rgba(239,68,68,0.08);
+  color: #ef4444;
+}
+.status-shipped {
+  background: rgba(59,130,246,0.08);
+  color: #3b82f6;
+}
+
+/* responsive: stack on small screens */
+@media (max-width: 767px) {
+  .order-left { width: auto; min-width: 0; }
+  .order-right { min-width: 0; width: auto; text-align: left; margin-top: 8px; }
+  .recent-orders-list .order-card-row { padding: 12px; }
+  .items-preview { gap:6px; }
+}
+/* -------------------------
+   Recent orders & dashboard responsive styles
+   Paste into src/index.css (or your global CSS)
+   ------------------------- */
+
+/* base order card styles */
+.recent-orders-list .order-card-row {
+  transition: transform .12s ease, box-shadow .12s ease;
+  border: 1px solid rgba(255,255,255,0.04);
+  background: var(--bg-card, #0f1724);
+  color: var(--text, #fff);
+  border-radius: 8px;
+}
+.recent-orders-list .order-card-row:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 28px rgba(2,6,23,0.55);
+}
+
+/* layout inner container: allow wrap on small screens */
+.order-card-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
+/* left column: make flexible on larger screens, shrink on small screens */
+.order-left {
+  flex: 0 0 200px; /* prefer 200px but can shrink */
+  min-width: 140px;
+}
+.order-left .order-id { font-weight: 700; font-size: 14px; color: #fff; }
+.order-left .order-customer { font-size: 13px; margin-top: 4px; }
+.order-left .order-date { font-size: 12px; color: #9aa3b2; margin-top: 6px; }
+
+/* middle area: items list should take remaining space and wrap */
+.order-middle {
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+.items-preview { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+/* pill style for items */
+.item-pill {
+  background: rgba(255,255,255,0.03);
+  padding: 6px 8px;
+  border-radius: 999px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  font-size: 13px;
+}
+.item-pill .item-name { max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-pill .item-qty { color: #9aa3b2; }
+.more-items { margin-left: 6px; color: #9aa3b2; }
+
+/* right side: totals + status */
+.order-right {
+  flex: 0 0 140px;
+  min-width: 90px;
+  width: 140px;
+  text-align: right;
+}
+.order-right .order-total { font-size: 15px; }
+
+/* status badges */
+.status-badge {
+  padding: 6px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.status-paid, .status-completed, .status-delivered {
+  background: rgba(16,185,129,0.12);
+  color: #10b981;
+}
+.status-pending, .status-processing {
+  background: rgba(245,158,11,0.08);
+  color: #f59e0b;
+}
+.status-cancelled, .status-refunded {
+  background: rgba(239,68,68,0.08);
+  color: #ef4444;
+}
+.status-shipped {
+  background: rgba(59,130,246,0.08);
+  color: #3b82f6;
+}
+
+/* Top products list responsive tweak */
+.card .list-unstyled li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+/* -------------------
+   Responsive breakpoints
+   ------------------- */
+
+/* Tablet / small desktop */
+@media (max-width: 992px) {
+  .order-left { flex: 0 0 170px; min-width: 120px; }
+  .order-right { flex: 0 0 120px; width: 120px; }
+}
+
+/* Mobile: stack vertically, increase wrapability */
+@media (max-width: 767px) {
+  .order-card-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .order-left {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .order-left .order-id { font-size: 13px; }
+  .order-left .order-customer { font-size: 13px; }
+  .order-left .order-date { font-size: 12px; }
+
+  .order-middle {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .items-preview { gap: 6px; }
+
+  .order-right {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+  }
+
+  .order-right .order-total { font-size: 14px; }
+}
+
+/* Very small screens: tighten spacing */
+@media (max-width: 420px) {
+  .item-pill .item-name { max-width: 100px; font-size: 12px; }
+  .item-pill { padding: 5px 6px; font-size: 12px; }
+  .order-card-row { padding: 10px; }
+}
+/* Dashboard container safe horizontal padding for small screens */
+.admin-dashboard-container {
+  box-sizing: border-box;
+  padding-left: 20px;   /* desktop default matched to inline */
+  padding-right: 20px;
+}
+
+/* Ensure card contents don't overflow on tiny screens */
+.admin-dashboard-container .card,
+.admin-dashboard-container .order-card-row {
+  box-sizing: border-box;
+}
+
+/* MOBILE - ensure comfortable left/right spacing at 375px and below */
+@media (max-width: 420px) {
+  .admin-dashboard-container {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  /* Slightly reduce card padding so everything fits nicely */
+  .admin-dashboard-container .order-card-row {
+    padding: 10px !important;
+  }
+
+  /* Make sure item pills wrap properly and don't push edges */
+  .admin-dashboard-container .items-preview {
+    gap: 6px;
+  }
+
+  /* Reduce margins on top-level container to avoid clipping on very small screens */
+  .admin-dashboard-container {
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+}
+
+/* VERY SMALL (optional) for phones narrower than 360px */
+@media (max-width: 360px) {
+  .admin-dashboard-container {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    margin-left: 6px;
+    margin-right: 6px;
+  }
+  .admin-dashboard-container .item-pill .item-name { max-width: 95px; }
+}
+/* Dashboard container safe horizontal padding for small screens */
+.admin-dashboard-container {
+  box-sizing: border-box;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* Ensure card contents don't overflow on tiny screens */
+.admin-dashboard-container .card,
+.admin-dashboard-container .order-card-row {
+  box-sizing: border-box;
+}
+
+/* base order card styles */
+.recent-orders-list .order-card-row {
+  transition: transform .12s ease, box-shadow .12s ease;
+  border: 1px solid rgba(255,255,255,0.04);
+  background: var(--bg-card, #0f1724);
+  color: var(--text, #fff);
+  border-radius: 8px;
+}
+.recent-orders-list .order-card-row:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 28px rgba(2,6,23,0.55);
+}
+
+/* layout inner container: allow wrap on small screens */
+.order-card-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
+/* left column */
+.order-left {
+  flex: 0 0 200px;
+  min-width: 140px;
+}
+.order-left .order-id { font-weight: 700; font-size: 14px; color: #fff; }
+.order-left .order-customer { font-size: 13px; margin-top: 4px; }
+.order-left .order-date { font-size: 12px; color: #9aa3b2; margin-top: 6px; }
+
+/* middle area: items list should take remaining space and wrap */
+.order-middle {
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+.items-preview { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+/* pill style for items */
+.item-pill {
+  background: rgba(255,255,255,0.03);
+  padding: 6px 8px;
+  border-radius: 999px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  font-size: 13px;
+}
+.item-pill .item-name { max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-pill .item-qty { color: #9aa3b2; }
+.more-items { margin-left: 6px; color: #9aa3b2; }
+
+/* right side: totals + status */
+.order-right {
+  flex: 0 0 140px;
+  min-width: 90px;
+  width: 140px;
+  text-align: right;
+}
+.order-right .order-total { font-size: 15px; }
+
+/* status badges */
+.status-badge {
+  padding: 6px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.status-paid, .status-completed, .status-delivered {
+  background: rgba(16,185,129,0.12);
+  color: #10b981;
+}
+.status-pending, .status-processing {
+  background: rgba(245,158,11,0.08);
+  color: #f59e0b;
+}
+.status-cancelled, .status-refunded {
+  background: rgba(239,68,68,0.08);
+  color: #ef4444;
+}
+.status-shipped {
+  background: rgba(59,130,246,0.08);
+  color: #3b82f6;
+}
+
+/* Top products list responsive tweak */
+.card .list-unstyled li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Tablet / small desktop */
+@media (max-width: 992px) {
+  .order-left { flex: 0 0 170px; min-width: 120px; }
+  .order-right { flex: 0 0 120px; width: 120px; }
+}
+
+/* Mobile: stack vertically, increase wrapability */
+@media (max-width: 767px) {
+  .order-card-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .order-left {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .order-left .order-id { font-size: 13px; }
+  .order-left .order-customer { font-size: 13px; }
+  .order-left .order-date { font-size: 12px; }
+
+  .order-middle {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .items-preview { gap: 6px; }
+
+  .order-right {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+  }
+
+  .order-right .order-total { font-size: 14px; }
+}
+
+/* Tiny phones: ensure comfortable gutters and avoid touching edges */
+@media (max-width: 420px) {
+  .admin-dashboard-container {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+  .admin-dashboard-container .order-card-row {
+    padding: 10px !important;
+  }
+  .item-pill .item-name { max-width: 100px; font-size: 12px; }
+}
+
+/* Extra tiny screens */
+@media (max-width: 360px) {
+  .admin-dashboard-container {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    margin-left: 6px;
+    margin-right: 6px;
+  }
+  .admin-dashboard-container .item-pill .item-name { max-width: 95px; }
+}

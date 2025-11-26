@@ -1,4 +1,3 @@
-// src/pages/user/Cart.jsx
 import { Container, Row, Col } from "react-bootstrap";
 import { useCart } from "../../context/CartContext";
 import { toast } from "react-toastify";
@@ -67,7 +66,8 @@ const Cart = () => {
                   <EdButton
                     className="ms-1 gradient-primary"
                     onClick={() => {
-                      removeFromCart(it._1d); // restored original logic but note: ensure id prop is _id
+                      // FIX: use the correct id property (_id) instead of the mistyped _1d
+                      removeFromCart(it._id);
                       toast.info("Removed from cart");
                     }}
                   >

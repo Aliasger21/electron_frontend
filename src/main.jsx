@@ -1,3 +1,4 @@
+// src/main.jsx
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import './index.css';
@@ -14,72 +15,119 @@ import { LoadingProvider } from './context/LoadingContext';
 // ⭐ ADD THIS IMPORT
 import ScrollToTop from "./components/ScrollToTop";
 
-// src/main.jsx (paste near the top, after imports)
+// keep axiosInstance import for repair flow
 import axiosInstance from "./utils/axiosInstance";
 
-/* ---------- Defensive guard: protect localStorage.user from minimal overwrites ---------- */
-const __origLocalSet = localStorage.setItem.bind(localStorage);
-const isMinimalUserObject = (obj) => {
-  if (!obj || typeof obj !== "object") return true;
-  const keys = Object.keys(obj);
-  if ((obj.iat || obj.exp) && keys.length <= 3) return true;
-  if (obj.email || obj.firstname) return false;
-  return true;
-};
+/* -------------------------
+   Safer dev-only localStorage guard
+   - Runs only in development
+   - Whitelists objects that look like a real user
+   - Blocks only clearly suspicious writes
+   - Uses Storage.prototype.setItem to avoid accidental overrides
+   ------------------------- */
+if (process.env.NODE_ENV === "development") {
+  const __origSet = Storage.prototype.setItem.bind(localStorage);
 
-localStorage.setItem = function (key, value) {
-  try {
-    if (key === "user") {
-      let parsed;
-      try {
-        parsed = JSON.parse(value);
-      } catch {
-        return __origLocalSet(key, value);
-      }
-      if (isMinimalUserObject(parsed)) {
-        console.warn("Blocked minimal localStorage.user write:", parsed);
-        console.trace();
+  const looksLikeUser = (obj) => {
+    if (!obj || typeof obj !== "object") return false;
+    // Accept if it contains any common identifying fields
+    if (
+      obj._id ||
+      obj.id ||
+      obj.userId ||
+      obj.email ||
+      obj.firstname ||
+      obj.firstName ||
+      obj.name ||
+      obj.profilePic ||
+      obj.avatar
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  localStorage.setItem = function (key, value) {
+    try {
+      if (key === "user") {
+        let parsed;
+        try {
+          parsed = JSON.parse(value);
+        } catch {
+          // If value is not JSON, write it as-is
+          return __origSet(key, value);
+        }
+
+        // If it looks like a real user, allow it
+        if (looksLikeUser(parsed)) {
+          return __origSet(key, JSON.stringify(parsed));
+        }
+
+        // Only block clearly suspicious/minimal objects (avoid false positives)
+        console.warn("Blocked suspicious localStorage.user write (dev-only):", parsed);
         return;
       }
-      return __origLocalSet(key, JSON.stringify(parsed));
-    }
-    return __origLocalSet(key, value);
-  } catch (err) {
-    return __origLocalSet(key, value);
-  }
-};
 
-/* ---------- Autorepair user ---------- */
+      return __origSet(key, value);
+    } catch (err) {
+      // final fallback: call original setter
+      return __origSet(key, value);
+    }
+  };
+}
+
+/* ---------- Autorepair user (robust, uses Storage.prototype.setItem) ---------- */
 (async function tryRepairUser() {
   try {
     const raw = localStorage.getItem("user");
     if (!raw) return;
-    const parsed = JSON.parse(raw);
-    if (!parsed) return;
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return;
+    }
+    if (!parsed || typeof parsed !== "object") return;
 
-    if (isMinimalUserObject(parsed)) {
+    // If parsed object seems minimal, try to repair using token/authverify
+    const isMinimal =
+      (!parsed._id && !parsed.email && !parsed.firstname && !parsed.name && !parsed.profilePic);
+
+    if (isMinimal) {
       const token = localStorage.getItem("token");
       if (token) {
-        axiosInstance.defaults.headers = axiosInstance.defaults.headers || {};
-        axiosInstance.defaults.headers.common = axiosInstance.defaults.headers.common || {};
-        axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      }
-
-      try {
-        const res = await axiosInstance.post("/authverify", {});
-        const userProfile = res?.data?.data?.data || res?.data?.data || res?.data || null;
-        if (userProfile && typeof userProfile === "object") {
-          localStorage.setItem("user", JSON.stringify(userProfile));
-          window.dispatchEvent(new Event("authChanged"));
-          console.info("Repaired localStorage.user from authverify.");
-        } else {
-          console.warn("authverify returned no usable profile:", res);
+        // ensure axiosInstance will attach Authorization for the repair request
+        try {
+          axiosInstance.defaults.headers = axiosInstance.defaults.headers || {};
+          axiosInstance.defaults.headers.common = axiosInstance.defaults.headers.common || {};
+          axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        } catch (e) {
+          console.warn("Failed to set axios header during repair:", e);
         }
-      } catch (err) {
-        console.warn("authverify failed during repair:", err);
+
+        try {
+          const res = await axiosInstance.post("/authverify", {});
+          const userProfile = res?.data?.data?.data || res?.data?.data || res?.data || null;
+          if (userProfile && typeof userProfile === "object") {
+            // Use Storage.prototype.setItem to avoid hitting any app-level override
+            try {
+              Storage.prototype.setItem.call(localStorage, "user", JSON.stringify(userProfile));
+              window.dispatchEvent(new Event("authChanged"));
+              console.info("Repaired localStorage.user from authverify.");
+            } catch (innerErr) {
+              console.warn("Repair: unable to write user to localStorage:", innerErr);
+            }
+          } else {
+            console.warn("authverify returned no usable profile during repair:", res);
+          }
+        } catch (err) {
+          console.warn("authverify failed during repair:", err);
+        }
       }
     }
-  } catch (err) {}
+  } catch (err) {
+    // swallow errors silently; repair is best-effort
+  }
 })();
 
 createRoot(document.getElementById("root")).render(

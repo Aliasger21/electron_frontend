@@ -67,9 +67,6 @@ const Contact = () => {
 
               <div className="d-flex gap-2">
                 <EdButton type="submit">Send Message</EdButton>
-                <a href="mailto:support@electron.store">
-                  <EdButton variant="outline">Email Support</EdButton>
-                </a>
               </div>
             </form>
           </Card>
