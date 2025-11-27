@@ -44,13 +44,51 @@ function ProductsPage() {
         setTimeout(() => setToast({ show: false, message: "", variant: "" }), 2500);
     };
 
+    // Robust fetch: page through API until all products are retrieved
     useEffect(() => {
         async function fetchProducts() {
+            setLoading(true);
             try {
-                const res = await axios.get(`${BACKEND_API}/products`);
-                const fetched = res.data.products || [];
-                setProducts(fetched);
-                setFilteredProducts(fetched);
+                const all = [];
+                let page = 1;
+                const perPage = 100; // tweak as needed
+                let total = Infinity;
+                let keepGoing = true;
+
+                while (keepGoing) {
+                    const res = await axios.get(`${BACKEND_API}/products`, {
+                        params: { page, perPage }
+                    });
+
+                    const fetched = res?.data?.products || [];
+                    // If backend returns a total count, use it
+                    if (typeof res?.data?.total === 'number') {
+                        total = res.data.total;
+                    }
+
+                    // Append fetched items
+                    all.push(...fetched);
+
+                    // Decide whether to continue:
+                    // - if total is known, stop when we've collected total items
+                    // - otherwise stop when a page returns fewer than perPage items
+                    if (Number.isFinite(total)) {
+                        if (all.length >= total) keepGoing = false;
+                        else page += 1;
+                    } else {
+                        if (fetched.length < perPage) keepGoing = false;
+                        else page += 1;
+                    }
+
+                    // safety: guard against infinite loops
+                    if (page > 1000) { // arbitrary safety cap
+                        console.warn("Stopping fetch loop: reached page cap");
+                        break;
+                    }
+                }
+
+                setProducts(all);
+                setFilteredProducts(all);
             } catch (err) {
                 console.error("❌ Fetch failed:", err);
                 showToast("Failed to load products", "danger");

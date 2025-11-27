@@ -55,7 +55,6 @@ export default function AdminLayout() {
                         <NavLink to="/admin/upload" className="nav-link">Upload Product</NavLink>
                         <NavLink to="/admin/users" className="nav-link">Users</NavLink>
                         <NavLink to="/admin/orders" className="nav-link">Orders</NavLink>
-                        <NavLink to="/admin/logout" className="nav-link">Logout</NavLink>
                     </nav>
                 </div>
 

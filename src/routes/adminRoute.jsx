@@ -5,7 +5,6 @@ import ProductsPage from "../pages/admin/adminProducts";
 import UploadProductPage from "../pages/admin/adminUpload";
 import UsersPage from "../pages/admin/adminUsers";
 import OrdersPage from "../pages/admin/adminOrders";
-import LogoutPage from "../pages/admin/adminLogout";
 
 // ====================================================
 // 🔒 ProtectedAdmin Wrapper (Frontend Route Protection)
@@ -51,7 +50,6 @@ const AdminRoute = () => {
                 <Route path="upload" element={<UploadProductPage />} />
                 <Route path="users" element={<UsersPage />} />
                 <Route path="orders" element={<OrdersPage />} />
-                <Route path="logout" element={<LogoutPage />} />
             </Route>
         </Routes>
     );
