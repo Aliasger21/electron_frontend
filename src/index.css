@@ -831,3 +831,77 @@ html, body {
   }
   .admin-dashboard-container .item-pill .item-name { max-width: 95px; }
 }
+/* Desktop only: make cards uniform height and clamp descriptions */
+/* Desktop: uniform product cards */
+@media (min-width: 992px) {
+  /* make the card a fixed-height box so every card looks identical */
+  .product-card {
+    display: flex;
+    flex-direction: column;
+    height: 520px;           /* <- total card height on desktop (tweak if you want taller/shorter) */
+    min-height: 520px;
+  }
+
+  /* image area: reserve consistent space */
+  .product-card .product-image {
+    min-height: 260px;       /* reserve image area */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+  }
+
+  /* restrict image rendering so it never overflows the reserved area */
+  .product-card .product-image img {
+    max-height: 240px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* body stretches to fill remaining space, footer pinned to bottom */
+  .product-card .card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    padding-bottom: 16px;
+  }
+
+  /* clamp title to 2 lines so titles don't push layout */
+  .product-card .card-title {
+    margin: 0 0 6px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.15em;
+    max-height: calc(1.15em * 2);
+    overflow: hidden;
+
+    /* clamp for multi-line truncation */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  /* clamp description to 4 lines (fills middle area) */
+  .product-card .card-description {
+    flex: 1 1 auto;
+    margin: 0 0 8px 0;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    line-height: 1.2em;
+    max-height: calc(1.2em * 4);
+  }
+
+  /* footer pinned to bottom consistently */
+  .product-card .card-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+}

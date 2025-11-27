@@ -1,6 +1,5 @@
-// src/pages/Products.jsx
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Container, Row, Col, Card, Badge, Spinner, Form, Button } from "react-bootstrap";
-import { useEffect, useState, useMemo, useRef } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BACKEND_API } from '../../config';
@@ -44,7 +43,7 @@ const Products = () => {
     height: "100%",
     display: "flex",
     flexDirection: "column",
-    cursor: "pointer", // indicate clickable card
+    cursor: "pointer",
   };
 
   // formatter for prices
@@ -52,7 +51,6 @@ const Products = () => {
     try {
       return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
     } catch {
-      // fallback
       return { format: (v) => `Rs ${v}` };
     }
   }, []);
@@ -61,13 +59,13 @@ const Products = () => {
   useEffect(() => {
     const t = setTimeout(() => {
       setSearch(searchTerm);
-      setPage(1); // reset page on new search
+      setPage(1);
     }, 300);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
-  // keep URL in sync with state (so links are shareable & back/forward work)
+  // keep URL in sync with state
   useEffect(() => {
     const params = {};
     if (search) params.search = search;
@@ -79,7 +77,7 @@ const Products = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, category, brand, page, perPage]);
 
-  // when URL changes (user used back/forward or external link), sync into component state
+  // when URL changes, sync into component state
   useEffect(() => {
     const qCategory = searchParams.get('category') || '';
     const qSearch = searchParams.get('search') || '';
@@ -90,7 +88,7 @@ const Products = () => {
     if (qCategory !== category) setCategory(qCategory);
     if (qSearch !== search) {
       setSearch(qSearch);
-      setSearchTerm(qSearch); // keep input in sync
+      setSearchTerm(qSearch);
     }
     if (qBrand !== brand) setBrand(qBrand);
     if (qPage !== page) setPage(qPage);
@@ -98,14 +96,13 @@ const Products = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // helper to produce a compact list of pages to render (avoids huge arrays)
+  // helper to produce a compact list of pages to render
   const getVisiblePages = (totalPages, current) => {
     const pages = [];
     if (totalPages <= 9) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
       return pages;
     }
-    // always show 1,2, near current, last-1,last
     pages.push(1, 2);
     const left = Math.max(3, current - 1);
     const right = Math.min(totalPages - 2, current + 1);
@@ -115,40 +112,90 @@ const Products = () => {
     if (right < totalPages - 2) pages.push('right-ellipsis');
 
     pages.push(totalPages - 1, totalPages);
-    // dedupe while preserving order
     return pages.filter((v, i, arr) => arr.indexOf(v) === i);
   };
 
   const totalPages = Math.max(1, Math.ceil(total / perPage));
 
-  // keep a ref to the current fetch controller so we can abort on next fetch or unmount
   const fetchControllerRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
     const controller = new AbortController();
-    // abort previous if any
     if (fetchControllerRef.current) {
-      try { fetchControllerRef.current.abort(); } catch {}
+      try { fetchControllerRef.current.abort(); } catch { }
     }
     fetchControllerRef.current = controller;
 
     async function fetchProducts() {
       setLoading(true);
       try {
+        // Convert slug -> label for backend compatibility
+        const categoryLabel = categories.find(c => c.slug === category)?.label || category;
+
         const params = { page, perPage };
-        if (category) params.category = category;
+        if (category) params.category = categoryLabel;
         if (brand) params.brand = brand;
         if (search) params.search = search;
+
+        // Helpful debug logs (remove in production)
+        // eslint-disable-next-line no-console
+        console.debug("Products: fetching with params:", params);
+
         const res = await axios.get(`${BACKEND_API}/products`, { params, signal: controller.signal });
+        // eslint-disable-next-line no-console
+        console.debug("Products: backend response:", res?.data);
+
+        let fetched = res.data.products || [];
+        let returnedTotal = typeof res.data.total === 'number' ? res.data.total : fetched.length;
+
+        // If backend returned no products for a category, attempt a safe client-side fallback:
+        // 1) If backend provided an `allProducts` key (some APIs do), use that pool.
+        // 2) Otherwise — as a last resort — fetch without the category filter (with a capped perPage) and filter client-side.
+        if (fetched.length === 0 && category) {
+          const normalizedWanted = (category.replace(/-/g, ' ').trim().toLowerCase());
+
+          // try allProducts if backend included it
+          const pool = Array.isArray(res.data.allProducts) ? res.data.allProducts : null;
+
+          if (pool) {
+            fetched = pool.filter(p => {
+              const pcat = (p.category || '').toString().trim().toLowerCase();
+              const pcatNormalized = pcat.replace(/\s+/g, ' ');
+              return pcatNormalized === normalizedWanted || pcat === category || pcat === category.replace(/-/g, ' ');
+            });
+            returnedTotal = fetched.length;
+            // eslint-disable-next-line no-console
+            console.debug("Products: fallback filtered from allProducts ->", fetched.length);
+          } else {
+            // last resort: fetch a larger unfiltered list and filter client-side (caution: may be heavy)
+            try {
+              const fallbackRes = await axios.get(`${BACKEND_API}/products`, { params: { page: 1, perPage: 1000, search }, signal: controller.signal });
+              const pool2 = fallbackRes.data.products || [];
+              fetched = pool2.filter(p => {
+                const pcat = (p.category || '').toString().trim().toLowerCase();
+                const pcatNormalized = pcat.replace(/\s+/g, ' ');
+                return pcatNormalized === normalizedWanted || pcat === category || pcat === category.replace(/-/g, ' ');
+              });
+              returnedTotal = fetched.length;
+              // eslint-disable-next-line no-console
+              console.debug("Products: fallback fetched and filtered ->", fetched.length);
+            } catch (fallbackErr) {
+              // ignore fallback errors but log
+              // eslint-disable-next-line no-console
+              console.error("Products: fallback fetch failed", fallbackErr);
+            }
+          }
+        }
+
         if (!mounted) return;
-        const fetched = res.data.products || [];
+
         setProducts(fetched);
-        setTotal(res.data.total || 0);
+        setTotal(returnedTotal || fetched.length);
       } catch (err) {
-        // axios with AbortController may throw a DOMException or an Axios-specific error
         const isAbort = err?.name === 'CanceledError' || err?.message?.toLowerCase()?.includes('canceled') || err?.code === 'ERR_CANCELED';
         if (!isAbort) {
+          // eslint-disable-next-line no-console
           console.error("Failed to fetch products", err);
         }
       } finally {
@@ -160,7 +207,7 @@ const Products = () => {
 
     return () => {
       mounted = false;
-      try { controller.abort(); } catch {}
+      try { controller.abort(); } catch { }
     };
   }, [page, perPage, category, brand, search]);
 
@@ -179,7 +226,6 @@ const Products = () => {
     if (!text) return { short: "", isTruncated: false };
     if (text.length <= max) return { short: text, isTruncated: false };
     const truncated = text.slice(0, max);
-    // try to cut at last space to avoid broken words
     const lastSpace = truncated.lastIndexOf(" ");
     const short = lastSpace > 20 ? truncated.slice(0, lastSpace) + "…" : truncated + "…";
     return { short, isTruncated: true };
@@ -211,10 +257,9 @@ const Products = () => {
             const { short, isTruncated } = truncateChars(p.description, 120);
             return (
               <Col key={p._id}>
-                {/* Make card clickable via onClick (navigates to product detail) */}
                 <div onClick={() => navigate(`/products/${p._id}`)} style={{ textDecoration: "none" }}>
-                  <Card style={cardStyle} className="h-100">
-                    <div className="product-image" style={{ padding: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 160 }}>
+                  <Card style={cardStyle} className="h-100 product-card">
+                    <div className="product-image" style={{ padding: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 240 }}>
                       <img
                         className="responsive-img"
                         src={p.image || "https://via.placeholder.com/200"}
@@ -226,20 +271,18 @@ const Products = () => {
                     <Card.Body className="d-flex flex-column">
                       <Card.Title style={{ color: "#ffffff", fontSize: "1rem", fontWeight: 600 }}>{p.productname}</Card.Title>
 
-                      {/* Truncated description + Read more */}
                       <Card.Text style={{ color: "var(--text-muted)", flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         <span>{short}</span>
                         {isTruncated && (
                           <>
                             {" "}
-                            {/* Explicit Read more link that navigates to product detail page */}
                             <Button
                               as={Link}
                               to={`/products/${p._id}`}
                               variant="link"
                               size="sm"
                               aria-label={`Read more about ${p.productname}`}
-                              onClick={(e) => e.stopPropagation()} /* stop outer div click to avoid double navigation side-effects */
+                              onClick={(e) => e.stopPropagation()}
                               style={{ padding: 0, fontWeight: 600, color: "var(--accent)" }}
                             >
                               Read more+
@@ -260,7 +303,6 @@ const Products = () => {
           })}
         </Row>
 
-        {/* Pagination controls */}
         <div className="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
           <Button variant="outline-light" size="sm" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
 
