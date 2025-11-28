@@ -104,8 +104,9 @@ export default function ProductDetail() {
         margin: "40px auto 0",
       }}
     >
-      {/* LOCAL CSS FIXED FOR RESPONSIVENESS */}
+      {/* LOCAL CSS FIXED FOR RESPONSIVENESS (Option A: object-fit: cover) */}
       <style>{`
+        /* ---------- Layout ---------- */
         .pd-grid {
           display: flex;
           gap: 20px;
@@ -114,10 +115,12 @@ export default function ProductDetail() {
         .pd-left { flex: 1; }
         .pd-right { width: 360px; }
 
+        /* ---------- Product detail viewport ---------- */
+        /* Use a fixed aspect container so image area is consistent across different image aspect ratios */
         .pd-viewport {
           width: 100%;
           max-width: 600px;
-          height: 460px;
+          aspect-ratio: 4 / 3; /* desktop/tablet ratio */
           background: #fff;
           border-radius: 12px;
           display: flex;
@@ -126,13 +129,19 @@ export default function ProductDetail() {
           overflow: hidden;
           margin: auto;
           padding: 10px;
+          box-sizing: border-box;
         }
+
+        /* ---------- OPTION A (ACTIVE): uniform fill, consistent visible size (cropped if necessary) ---------- */
         .pd-img {
           width: 100%;
           height: 100%;
-          object-fit: contain;
+          object-fit: cover;  /* fills the container and keeps images perfectly uniform */
+          object-position: center center;
+          display: block;
         }
 
+        /* ---------- Controls and spacing ---------- */
         .pd-actions {
           display: flex;
           gap: 12px;
@@ -148,7 +157,25 @@ export default function ProductDetail() {
           max-width: 80px;
         }
 
-        /* MOBILE STYLING */
+        /* ---------- Reusable thumbnail class for product lists/cards ---------- */
+        .uniform-thumb {
+          width: 100%;
+          aspect-ratio: 1 / 1;  /* square thumbnails; change to 4/3 if you prefer */
+          overflow: hidden;
+          border-radius: 8px;
+          background: #fff;
+          display: block;
+          position: relative;
+        }
+        .uniform-thumb .uniform-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;    /* same tradeoff: cover = consistent fill */
+          object-position: center center;
+          display: block;
+        }
+
+        /* ---------- MOBILE STYLING ---------- */
         @media (max-width: 992px) {
           .pd-grid {
             flex-direction: column;
@@ -158,10 +185,12 @@ export default function ProductDetail() {
             width: 100%;
             margin-top: 18px;
           }
+
+          /* mobile: prefer square preview for product detail */
           .pd-viewport {
-            height: 46vw;
+            aspect-ratio: 1 / 1;
+            max-height: 46vw;
             min-height: 210px;
-            max-height: 420px;
             padding: 4vw 2vw;
           }
 
@@ -182,6 +211,13 @@ export default function ProductDetail() {
           .pd-qty-input {
             width: 100%;
           }
+        }
+
+        /* ---------- Small helpers (optional) ---------- */
+        .img-center {
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
       `}</style>
 
