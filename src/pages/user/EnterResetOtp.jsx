@@ -1,4 +1,3 @@
-// src/pages/user/EnterResetOtp.jsx
 import { Container, Row, Col } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import axiosInstance from "../../utils/axiosInstance";
@@ -33,15 +32,11 @@ const EnterResetOtp = () => {
 
         setVerifying(true);
         try {
-            // Optional: verify OTP quickly via backend if you have endpoint.
-            // If not, just navigate to NewPassword with email+otp and validate there.
-            // We'll attempt a lightweight verify endpoint if available, otherwise skip.
             try {
                 await axiosInstance.post("/verify-reset-otp", { email, otp });
                 // if successful proceed to reset password page
                 navigate("/reset-password", { state: { email, otp } });
             } catch (err) {
-                // if endpoint doesn't exist or returns 404, still navigate to reset page
                 if (err?.response?.status === 404 || err?.response?.status === 405) {
                     navigate("/reset-password", { state: { email, otp } });
                 } else {

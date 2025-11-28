@@ -25,9 +25,9 @@ const App = () => {
       } catch (err) {
         // interceptor already handles clearing + redirect in most cases.
         // As a fallback ensure we clear local storage and notify app.
-        try { localStorage.removeItem("token"); } catch {}
-        try { localStorage.removeItem("user"); } catch {}
-        try { window.dispatchEvent(new Event("authChanged")); } catch {}
+        try { localStorage.removeItem("token"); } catch { }
+        try { localStorage.removeItem("user"); } catch { }
+        try { window.dispatchEvent(new Event("authChanged")); } catch { }
         // don't force another redirect here because interceptor likely already did it.
       }
     };

@@ -1,4 +1,3 @@
-// src/pages/user/Checkout.jsx
 import { Container, Row, Col, Form } from "react-bootstrap";
 import { useCart } from "../../context/CartContext";
 import { useState, useEffect, useRef } from "react";
@@ -17,26 +16,22 @@ const Checkout = () => {
   const [customer, setCustomer] = useState({ name: "", email: "", address: "", phone: "" });
   const navigate = useNavigate();
 
-  // guard to prevent double-running side effects in Strict Mode (dev)
   const didRunRef = useRef(false);
 
   const total = cart.reduce((s, it) => s + Number(it.price || 0) * Number(it.qty || 1), 0);
 
   useEffect(() => {
-    // protect against double-run in React Strict Mode during development
     if (didRunRef.current) return;
     didRunRef.current = true;
 
     // Redirect immediately if not logged in
     const token = localStorage.getItem("token");
     if (!token) {
-      // toastId prevents duplicate toasts if this somehow fires more than once
       toast.info("Please login to continue", { toastId: "checkout-login-redirect" });
       navigate("/login");
       return;
     }
 
-    // Load user info if logged in
     const loadUser = () => {
       try {
         const raw = localStorage.getItem("user");
@@ -51,7 +46,6 @@ const Checkout = () => {
           phone: u.phone || c.phone,
         }));
       } catch (e) {
-        // ignore parsing errors
       }
     };
 
@@ -70,7 +64,6 @@ const Checkout = () => {
 
     const token = localStorage.getItem("token");
     if (!token) {
-      // fallback check (shouldn't normally happen because of page-level redirect)
       toast.info("Please log in or register before placing an order", { toastId: "checkout-login-redirect" });
       navigate("/login");
       return;
@@ -79,7 +72,7 @@ const Checkout = () => {
     setLoading(true);
     try {
       if (showLoading) showLoading("Placing your order...");
-    } catch {}
+    } catch { }
 
     try {
       const payload = {
@@ -105,7 +98,7 @@ const Checkout = () => {
       setLoading(false);
       try {
         if (hideLoading) hideLoading();
-      } catch {}
+      } catch { }
     }
   };
 

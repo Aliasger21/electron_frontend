@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import { Container, Row, Col, Badge } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -117,7 +116,6 @@ const Home = () => {
             }, 60);
         };
 
-        // run on mount and also after loading completes to reveal skeleton -> content transition
         applyReveal();
     }, [loading]);
 
@@ -345,75 +343,75 @@ const Home = () => {
                 )}
             </Row>
 
-           {/* Testimonials */}
-<Row className="mb-5 fade-in">
-    <Col md={12} className="mb-4">
-        <h2 className="fw-bold mb-4 text-white text-center">What Our Customers Say</h2>
-    </Col>
+            {/* Testimonials */}
+            <Row className="mb-5 fade-in">
+                <Col md={12} className="mb-4">
+                    <h2 className="fw-bold mb-4 text-white text-center">What Our Customers Say</h2>
+                </Col>
 
-    {loading ? (
-        Array.from({ length: 4 }).map((_, idx) => (
-            <Col xs={12} sm={6} md={3} className="mb-4" key={`testi-skel-${idx}`}>
-                <div
-                    className="ed-card p-4"
-                    style={{
-                        minHeight: "260px",
-                        height: "260px",
-                        width: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between"
-                    }}
-                >
-                    <Skeleton style={{ height: 18, width: "50%", borderRadius: 6, marginBottom: 12 }} />
-                    <Skeleton style={{ height: 60, width: "100%", borderRadius: 6, marginBottom: 12 }} />
-                    <Skeleton style={{ height: 14, width: "40%", borderRadius: 6 }} />
-                </div>
-            </Col>
-        ))
-    ) : (
-        testimonials.map((testimonial, idx) => (
-            <Col xs={12} sm={6} md={3} className="mb-4" key={idx}>
-                <div
-                    className="ed-card p-4 clickable-card card-hover"
-                    tabIndex={0}
-                    style={{
-                        minHeight: "210px",
-                        height: "210px",
-                        width: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between"
-                    }}
-                >
-                    <div
-                        style={{
-                            color: "var(--accent)",
-                            marginBottom: "15px",
-                            fontSize: "1.2rem"
-                        }}
-                    >
-                        {"⭐".repeat(testimonial.rating)}
-                    </div>
+                {loading ? (
+                    Array.from({ length: 4 }).map((_, idx) => (
+                        <Col xs={12} sm={6} md={3} className="mb-4" key={`testi-skel-${idx}`}>
+                            <div
+                                className="ed-card p-4"
+                                style={{
+                                    minHeight: "260px",
+                                    height: "260px",
+                                    width: "100%",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "space-between"
+                                }}
+                            >
+                                <Skeleton style={{ height: 18, width: "50%", borderRadius: 6, marginBottom: 12 }} />
+                                <Skeleton style={{ height: 60, width: "100%", borderRadius: 6, marginBottom: 12 }} />
+                                <Skeleton style={{ height: 14, width: "40%", borderRadius: 6 }} />
+                            </div>
+                        </Col>
+                    ))
+                ) : (
+                    testimonials.map((testimonial, idx) => (
+                        <Col xs={12} sm={6} md={3} className="mb-4" key={idx}>
+                            <div
+                                className="ed-card p-4 clickable-card card-hover"
+                                tabIndex={0}
+                                style={{
+                                    minHeight: "210px",
+                                    height: "210px",
+                                    width: "100%",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "space-between"
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        color: "var(--accent)",
+                                        marginBottom: "15px",
+                                        fontSize: "1.2rem"
+                                    }}
+                                >
+                                    {"⭐".repeat(testimonial.rating)}
+                                </div>
 
-                    <p
-                        className="text-muted mb-2"
-                        style={{
-                            fontStyle: "italic",
-                            lineHeight: 1.6,
-                            flex: 1,
-                            overflow: "hidden"
-                        }}
-                    >
-                        "{testimonial.text}"
-                    </p>
+                                <p
+                                    className="text-muted mb-2"
+                                    style={{
+                                        fontStyle: "italic",
+                                        lineHeight: 1.6,
+                                        flex: 1,
+                                        overflow: "hidden"
+                                    }}
+                                >
+                                    "{testimonial.text}"
+                                </p>
 
-                    <p className="fw-semibold text-white mb-0">— {testimonial.name}</p>
-                </div>
-            </Col>
-        ))
-    )}
-</Row>
+                                <p className="fw-semibold text-white mb-0">— {testimonial.name}</p>
+                            </div>
+                        </Col>
+                    ))
+                )}
+            </Row>
 
         </Container>
     );

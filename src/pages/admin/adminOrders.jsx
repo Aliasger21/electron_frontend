@@ -49,7 +49,7 @@ function OrdersPage() {
         }
     };
 
-    
+
 
     return (
         <Container className="py-4">
@@ -107,12 +107,10 @@ function OrdersPage() {
                                             axios.put(`${BACKEND_API}/orders/${o._id}/eta`, { estimatedDelivery: val }, { headers: { Authorization: localStorage.getItem('token') || '' } })
                                                 .then(res => {
                                                     setOrders(prev => prev.map(p => p._id === o._id ? res.data.order : p));
-                                                    // optional feedback for admin
                                                 })
                                                 .catch(err => {
                                                     console.error(err);
-                                                    // show a toast if available
-                                                    try { window.dispatchEvent(new CustomEvent('showToast', { detail: { message: 'Failed to update ETA', variant: 'danger' } })); } catch(e){}
+                                                    try { window.dispatchEvent(new CustomEvent('showToast', { detail: { message: 'Failed to update ETA', variant: 'danger' } })); } catch (e) { }
                                                 });
                                         }}
                                         placeholderText="Set ETA"

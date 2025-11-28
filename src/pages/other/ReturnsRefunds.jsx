@@ -1,4 +1,3 @@
-// src/pages/other/ReturnsRefunds.jsx
 import { Container } from "react-bootstrap";
 
 const ReturnsRefunds = () => {

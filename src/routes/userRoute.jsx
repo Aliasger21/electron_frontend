@@ -9,10 +9,9 @@ import About from "../pages/user/About";
 import Contact from "../pages/user/Contact";
 import Login from "../pages/user/Login";
 import Register from "../pages/user/Register";
-// OTP verification
 import VerifyOTP from "../pages/user/VerifyOTP";
 import VerifySuccess from "../pages/user/VerifySuccess";
-import LegacyVerifyRedirect from "../pages/user/LegacyVerifyRedirect"; // <--- new
+import LegacyVerifyRedirect from "../pages/user/LegacyVerifyRedirect";
 import Profile from "../pages/user/Profile";
 import MyOrders from "../pages/user/MyOrders";
 

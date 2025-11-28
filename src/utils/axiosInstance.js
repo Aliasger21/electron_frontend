@@ -1,8 +1,7 @@
-// src/utils/axiosInstance.js
 import axios from "axios";
 import { toast } from "react-toastify";
 import { BACKEND_API } from "../config";
-import { clearAuth } from "./authHelpers";  // use your new helper
+import { clearAuth } from "./authHelpers"; 
 
 const axiosInstance = axios.create({
   baseURL: BACKEND_API,
@@ -34,7 +33,7 @@ axiosInstance.interceptors.request.use(
    Global response interceptor:
    - auto logout on 401, 403, 404
    - handles deleted accounts
-   - uses clearAuth() (your helper)
+   - uses clearAuth()
 ------------------------------------------------------ */
 axiosInstance.interceptors.response.use(
   (res) => res,

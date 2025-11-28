@@ -2,25 +2,27 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import { House, Boxes, Users } from "lucide-react";
 
-const AdminSidebar = () => {
-    const links = [
-        { to: "/admin", label: "Dashboard", icon: <House size={18} /> },
-        { to: "/admin/products", label: "Products", icon: <Boxes size={18} /> },
-        { to: "/admin/users", label: "Users", icon: <Users size={18} /> },
-    ];
+const links = [
+    { to: "/admin", label: "Dashboard", Icon: House },
+    { to: "/admin/products", label: "Products", Icon: Boxes },
+    { to: "/admin/users", label: "Users", Icon: Users },
+];
 
+const AdminSidebar = () => {
     return (
         <div className="d-flex flex-column sidebar-container">
-            <h4 className="fw-bold mb-4" style={{ color: "var(--accent)" }}>Admin Panel</h4>
-            {links.map((link) => (
+            <h4 className="fw-bold mb-4 text-accent">Admin Panel</h4>
+
+            {links.map(({ to, label, Icon }) => (
                 <NavLink
-                    key={link.to}
-                    to={link.to}
+                    key={to}
+                    to={to}
                     className={({ isActive }) =>
-                        `nav-link ${isActive ? "active" : ""} d-flex align-items-center gap-2`
+                        `nav-link d-flex align-items-center gap-2 ${isActive ? "active" : ""}`
                     }
                 >
-                    {link.icon} {link.label}
+                    <Icon size={18} />
+                    {label}
                 </NavLink>
             ))}
         </div>

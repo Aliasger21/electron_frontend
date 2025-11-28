@@ -1,4 +1,3 @@
-// src/pages/ProductDetail.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { Container, Badge } from "react-bootstrap";
 import { toast } from "react-toastify";

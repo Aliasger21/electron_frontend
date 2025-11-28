@@ -1,4 +1,3 @@
-// src/utils/authHelpers.js
 import axiosInstance from "../utils/axiosInstance";
 
 /**
@@ -48,7 +47,7 @@ export function setToken(token) {
 }
 
 /**
- * 🔥 Full secure logout:
+ * Full secure logout:
  * - Clears token
  * - Clears user
  * - Clears cookies (if any)

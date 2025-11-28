@@ -1,4 +1,3 @@
-// src/pages/admin/AdminDashboard.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Row, Col, Badge, Spinner } from "react-bootstrap";
@@ -6,14 +5,6 @@ import EdCard from "../../components/ui/Card";
 import EdButton from "../../components/ui/button";
 import { Link } from "react-router-dom";
 import { BACKEND_API } from '../../config';
-
-/**
- * AdminDashboard (final)
- * - Uses BACKEND_API via axios
- * - Recent orders redesigned (compact cards, no view/update)
- * - Uses Bearer token for Authorization
- * - Root container has class `admin-dashboard-container` for responsive gutters
- */
 
 const completedStatuses = ['paid', 'completed', 'delivered'];
 
@@ -37,7 +28,6 @@ export default function AdminDashboard() {
     const [recentOrders, setRecentOrders] = useState([]);
     const [topProducts, setTopProducts] = useState([]);
 
-    // Use Bearer token pattern
     const token = localStorage.getItem('token');
     const axiosInstance = axios.create({
         baseURL: BACKEND_API,
@@ -54,7 +44,6 @@ export default function AdminDashboard() {
             setLoading(true);
 
             try {
-                // fetch orders
                 let orders = [];
                 try {
                     const res = await axiosInstance.get('/orders');
@@ -71,7 +60,6 @@ export default function AdminDashboard() {
                     }
                 }
 
-                // fetch products
                 let products = [];
                 try {
                     const pres = await axiosInstance.get('/products');
@@ -82,7 +70,6 @@ export default function AdminDashboard() {
                     products = [];
                 }
 
-                // fetch users
                 let users = [];
                 try {
                     const ures = await axiosInstance.get('/getsignup');
@@ -97,7 +84,6 @@ export default function AdminDashboard() {
                     users = [];
                 }
 
-                // compute revenue
                 let revenueNum = 0;
                 if (Array.isArray(orders)) {
                     revenueNum = orders.reduce((acc, o) => {
@@ -110,14 +96,12 @@ export default function AdminDashboard() {
                     }, 0);
                 }
 
-                // recent orders (by date desc)
                 const recent = Array.isArray(orders) ? orders.slice().sort((a, b) => {
                     const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
                     const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
                     return tb - ta;
                 }).slice(0, 8) : [];
 
-                // compute top products from order items
                 const prodMap = new Map();
                 if (Array.isArray(orders)) {
                     orders.forEach(o => {
@@ -175,8 +159,6 @@ export default function AdminDashboard() {
         return () => { mounted = false; };
     }, []);
 
-
-    // update status handler (optimistic UI)
     const updateStatus = async (id, status) => {
         setRecentOrders(prev => prev.map(o => {
             const oid = o._id || o.id || o.orderId;
@@ -204,7 +186,6 @@ export default function AdminDashboard() {
         }
     };
 
-    // RecentOrdersList subcomponent
     function RecentOrdersList({ recentOrders = [], loading = false }) {
         if (loading) return <div className="p-4 d-flex justify-content-center"><Spinner animation="border" /></div>;
         if (!recentOrders || recentOrders.length === 0) return <div className="p-4 text-center text-muted">No recent orders</div>;
@@ -263,7 +244,6 @@ export default function AdminDashboard() {
 
     return (
         <div className="admin-dashboard-container" style={{ padding: 20, maxWidth: 1200, margin: '20px auto', boxSizing: 'border-box' }}>
-            {/* STAT CARDS */}
             <Row className="g-3 mb-3">
                 {stats.map(s => (
                     <Col key={s.label} xs={12} sm={6} md={6} lg={3}>
@@ -293,7 +273,6 @@ export default function AdminDashboard() {
                 ))}
             </Row>
 
-            {/* ORDERS + SIDEBAR */}
             <Row>
                 <Col xs={12} lg={8} className="mb-3">
                     <EdCard className="card">

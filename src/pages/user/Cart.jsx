@@ -41,7 +41,6 @@ const Cart = () => {
                 />
               </div>
 
-              {/* Details */}
               <div className="cart-item-details">
                 <div className="product-title">{it.productname}</div>
                 <div style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
@@ -66,7 +65,6 @@ const Cart = () => {
                   <EdButton
                     className="ms-1 gradient-primary"
                     onClick={() => {
-                      // FIX: use the correct id property (_id) instead of the mistyped _1d
                       removeFromCart(it._id);
                       toast.info("Removed from cart");
                     }}

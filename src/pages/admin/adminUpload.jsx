@@ -66,8 +66,6 @@ const UploadProductPage = () => {
                 position: "top-right",
                 autoClose: 3000,
             });
-
-            // Reset form
             setProductname("");
             setPrice("");
             setDescription("");
@@ -78,12 +76,9 @@ const UploadProductPage = () => {
         } catch (err) {
             console.error("Upload error:", err);
 
-            // Backend message (if available)
             const errorMsg =
                 err.response?.data?.message ||
                 "❌ Upload failed. Please try again.";
-
-            // Use toast instead of Alert
             toast.error(errorMsg, {
                 position: "top-right",
                 autoClose: 4000,
@@ -97,7 +92,6 @@ const UploadProductPage = () => {
 
     return (
         <Container className="py-4 position-relative">
-            {/* 🟢 Toast Container */}
             <ToastContainer
                 position="top-right"
                 autoClose={4000}
@@ -108,7 +102,6 @@ const UploadProductPage = () => {
                 draggable
             />
 
-            {/* 🟩 Loading Overlay */}
             {loading && (
                 <div
                     style={{

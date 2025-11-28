@@ -44,14 +44,13 @@ function ProductsPage() {
         setTimeout(() => setToast({ show: false, message: "", variant: "" }), 2500);
     };
 
-    // Robust fetch: page through API until all products are retrieved
     useEffect(() => {
         async function fetchProducts() {
             setLoading(true);
             try {
                 const all = [];
                 let page = 1;
-                const perPage = 100; // tweak as needed
+                const perPage = 100;
                 let total = Infinity;
                 let keepGoing = true;
 
@@ -61,17 +60,12 @@ function ProductsPage() {
                     });
 
                     const fetched = res?.data?.products || [];
-                    // If backend returns a total count, use it
                     if (typeof res?.data?.total === 'number') {
                         total = res.data.total;
                     }
 
-                    // Append fetched items
                     all.push(...fetched);
 
-                    // Decide whether to continue:
-                    // - if total is known, stop when we've collected total items
-                    // - otherwise stop when a page returns fewer than perPage items
                     if (Number.isFinite(total)) {
                         if (all.length >= total) keepGoing = false;
                         else page += 1;
@@ -80,8 +74,7 @@ function ProductsPage() {
                         else page += 1;
                     }
 
-                    // safety: guard against infinite loops
-                    if (page > 1000) { // arbitrary safety cap
+                    if (page > 1000) {
                         console.warn("Stopping fetch loop: reached page cap");
                         break;
                     }
@@ -278,7 +271,7 @@ function ProductsPage() {
                                             "0 5px 15px rgba(0,0,0,0.1)";
                                     }}
                                 >
-                                    {/* 🖼 Updated image section */}
+
                                     <div className="position-relative">
                                         <div className="product-image">
                                             <img
@@ -343,7 +336,6 @@ function ProductsPage() {
                 </Row>
             )}
 
-            {/* 🟩 Edit Modal */}
             <Modal
                 show={showModal}
                 onHide={() => setShowModal(false)}
@@ -485,7 +477,6 @@ function ProductsPage() {
                 </Modal.Footer>
             </Modal>
 
-            {/* 🟥 Delete Confirmation */}
             <Modal
                 show={deleteConfirm.show}
                 onHide={() => setDeleteConfirm({ show: false, id: null })}

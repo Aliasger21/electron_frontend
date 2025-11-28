@@ -1,4 +1,3 @@
-// src/pages/user/Contact.jsx
 import { Container, Row, Col } from 'react-bootstrap';
 import { useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';

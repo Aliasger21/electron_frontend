@@ -1,12 +1,6 @@
 import React from "react";
 import { Spinner } from "react-bootstrap";
 
-/**
- * LoadingOverlay
- * Props:
- *  - show: boolean (whether to render)
- *  - message: optional string shown under spinner
- */
 export default function LoadingOverlay({ show = false, message = "Processing..." }) {
   if (!show) return null;
 

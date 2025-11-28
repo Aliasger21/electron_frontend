@@ -1,4 +1,3 @@
-// src/pages/other/PrivacyPolicy.jsx
 import { Container } from "react-bootstrap";
 
 const PrivacyPolicy = () => {

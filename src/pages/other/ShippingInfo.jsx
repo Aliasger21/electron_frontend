@@ -1,4 +1,3 @@
-// src/pages/other/ShippingInfo.jsx
 import { Container } from "react-bootstrap";
 
 const ShippingInfo = () => {

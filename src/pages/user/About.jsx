@@ -1,4 +1,3 @@
-// src/pages/user/About.jsx
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import EdButton from '../../components/ui/button';

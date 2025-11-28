@@ -1,4 +1,3 @@
-// src/pages/other/FAQ.jsx
 import { Container } from "react-bootstrap";
 
 const FAQ = () => {

@@ -4,9 +4,6 @@ import AdminHeader from "../components/admin/adminHeader";
 import AdminSidebar from "../components/admin/adminSidebar";
 import "./admin.css";
 
-// =========================
-// 🔒 ADMIN PROTECTION ADDED
-// =========================
 export default function AdminLayout() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -16,7 +13,7 @@ export default function AdminLayout() {
         const token = localStorage.getItem("token");
 
         if (!rawUser || !token) {
-            navigate("/"); // not logged in at all
+            navigate("/");
             return;
         }
 
@@ -29,7 +26,7 @@ export default function AdminLayout() {
         }
 
         if (userObj.role !== "admin") {
-            navigate("/"); // logged in but not admin
+            navigate("/");
         }
     }, [navigate]);
 
@@ -41,7 +38,6 @@ export default function AdminLayout() {
             .replace(/\b\w/g, (c) => c.toUpperCase());
     };
 
-    // FULL ORIGINAL LAYOUT BELOW — UNTOUCHED
     return (
         <>
             <AdminHeader />
