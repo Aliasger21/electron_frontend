@@ -18,7 +18,6 @@ const Home = () => {
         { name: "Smartwatches", icon: "⌚", path: "/products?category=smartwatches" },
         { name: "Accessories", icon: "🔌", path: "/products?category=accessories" },
         { name: "Tablets", icon: "📱", path: "/products?category=tablets" },
-        // use slug (no space) to avoid URL issues
         { name: "Gaming", icon: "🎮", path: "/products?category=gaming-consoles" },
     ];
 
@@ -68,7 +67,6 @@ const Home = () => {
 
                 fetched.forEach(product => {
                     if (product.category) {
-                        // robust normalization: trim, lowercase, collapse spaces
                         const raw = String(product.category).toLowerCase().trim().replace(/\s+/g, ' ');
                         const normalized = categoryVariations[raw] || raw.replace(/\s+/g, '-');
                         if (!categoryMap.has(normalized)) {
@@ -105,12 +103,10 @@ const Home = () => {
         return () => { mounted = false; controller.abort(); };
     }, []);
 
-    // Minimal animations (fade-in & hover lift). Respects prefers-reduced-motion.
     useEffect(() => {
         const applyReveal = () => {
             const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             if (prefersReduced) return;
-            // reveal fades after a tiny delay so CSS transitions run
             setTimeout(() => {
                 document.querySelectorAll('.fade-in').forEach(el => el.classList.add('visible'));
             }, 60);
@@ -121,7 +117,7 @@ const Home = () => {
 
     return (
         <Container className="py-5">
-            {/* Local CSS for animations (kept inside component so no external edits required) */}
+            {/* Local CSS for animations + stat-card fix */}
             <style>{`
                 .fade-in { opacity: 0; transform: translateY(8px); transition: opacity .45s ease, transform .45s ease; }
                 .fade-in.visible { opacity: 1; transform: translateY(0); }
@@ -131,6 +127,26 @@ const Home = () => {
                 .card-hover:focus .card-img-scale, .card-hover:hover .card-img-scale { transform: scale(1.06); }
                 @media (prefers-reduced-motion: reduce) {
                     .fade-in, .card-hover, .card-img-scale { transition: none !important; transform: none !important; box-shadow: none !important; }
+                }
+
+                /* ====== stat-card equal height fix ====== */
+                .stat-card {
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                  align-items: center;
+                  min-height: 150px; /* equalizes card heights across breakpoints */
+                  padding-top: 1rem;
+                  padding-bottom: 1rem;
+                }
+                .stat-card h3 {
+                  margin: 0;
+                  line-height: 1;
+                  word-break: keep-all;
+                }
+                @media (max-width: 400px) {
+                  .stat-card { min-height: 135px; }
+                  .stat-card h3 { font-size: 2rem; }
                 }
             `}</style>
 
@@ -193,7 +209,6 @@ const Home = () => {
                 </Col>
 
                 {loading ? (
-                    // show 8 skeleton category cards
                     categories.map((_, idx) => (
                         <Col xs={6} sm={4} md={3} className="mb-3" key={`cat-skel-${idx}`}>
                             <div className="ed-card text-center py-4" tabIndex={-1}>
@@ -234,7 +249,6 @@ const Home = () => {
                 </Col>
 
                 {loading ? (
-                    // product skeletons (8)
                     Array.from({ length: 8 }).map((_, idx) => (
                         <Col xs={12} sm={6} md={4} lg={3} className="mb-4" key={`prod-skel-${idx}`}>
                             <div className="ed-card h-100" tabIndex={-1}>
@@ -294,10 +308,9 @@ const Home = () => {
                     <h2 className="fw-bold mb-4 text-white text-center">Why Choose Us?</h2>
                 </Col>
                 {loading ? (
-                    // stats skeletons
                     stats.map((_, idx) => (
                         <Col xs={6} md={3} className="mb-4" key={`stat-skel-${idx}`}>
-                            <div className="ed-card text-center py-4">
+                            <div className="ed-card text-center py-4 stat-card">
                                 <Skeleton style={{ height: 40, width: 120, borderRadius: 8, margin: '0 auto 8px' }} />
                                 <Skeleton style={{ height: 14, width: '60%', borderRadius: 6, margin: '0 auto' }} />
                             </div>
@@ -306,8 +319,8 @@ const Home = () => {
                 ) : (
                     stats.map((stat, idx) => (
                         <Col xs={6} md={3} className="mb-4" key={idx}>
-                            <div className="ed-card text-center py-4 clickable-card card-hover" tabIndex={0}>
-                                <h3 className="fw-bold" style={{ color: "var(--accent)", fontSize: "2.5rem", marginBottom: "10px" }}>{stat.number}</h3>
+                            <div className="ed-card text-center py-4 clickable-card card-hover stat-card" tabIndex={0}>
+                                <h3 className="fw-bold" style={{ color: "var(--accent)", fontSize: "2.5rem" }}>{stat.number}</h3>
                                 <p className="text-muted mb-0" style={{ fontSize: "0.95rem" }}>{stat.label}</p>
                             </div>
                         </Col>
